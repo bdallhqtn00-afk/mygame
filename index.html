@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <title>استجواب الأرواح</title>
+    <style>
+        body { background-color: #050505; color: #ff0000; font-family: 'Courier New', sans-serif; text-align: center; padding-top: 100px; }
+        input { background: transparent; border: 1px solid #ff0000; color: white; padding: 10px; font-size: 18px; width: 80%; margin-top: 20px; outline: none; }
+        button { background: #ff0000; color: black; border: none; padding: 10px 20px; font-size: 18px; cursor: pointer; margin-top: 10px; }
+        #question { font-size: 24px; min-height: 50px; text-shadow: 0 0 10px red; }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <h1 id="question">هل أنت مستعد لبدء الاستجواب؟</h1>
+        <input type="text" id="answerInput" placeholder="اكتب جوابك هنا...">
+        <br>
+        <button onclick="nextQuestion()">أجبني!</button>
+    </div>
+
+    <script>
+        const questions = [
+            "ما هو سرك الذي لا يعرفه أحد سواك؟",
+            "لماذا تشعر بأن أحداً يراقبك من خلفك الآن؟",
+            "هل تتذكر ماذا فعلت في تلك الليلة المظلمة؟",
+            "إذا انطفأت الأنوار الآن، من هو أول شخص ستفكر فيه؟",
+            "النهاية تقترب.. هل تشعر ببرودة في المكان؟"
+        ];
+        
+        let currentIdx = 0;
+
+        function nextQuestion() {
+            let input = document.getElementById("answerInput");
+            if (input.value === "") {
+                alert("لا تهرب من السؤال! أجب!");
+                return;
+            }
+            
+            currentIdx++;
+            if (currentIdx < questions.length) {
+                document.getElementById("question").innerText = questions[currentIdx];
+                input.value = ""; // مسح الخانة للسؤال التالي
+            } else {
+                document.getElementById("game-container").innerHTML = "<h1>لقد عرفنا عنك الكثير.. سنلتقي قريباً!</h1>";
+                // هنا يمكننا جعل الهاتف يهتز كحركة مرعبة إضافية
+                window.navigator.vibrate([500, 200, 500]); 
+            }
+        }
+    </script>
+</body>
+</html>
