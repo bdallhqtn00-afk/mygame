@@ -5,91 +5,145 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>استجواب الأرواح - Shadow Pulse</title>
     <style>
-        body { background-color: #050000; color: #00ff00; font-family: 'Courier New', monospace; text-align: center; padding: 20px; }
-        #game-container { border: 2px solid #300; padding: 20px; border-radius: 15px; background: #000; max-width: 450px; margin: auto; box-shadow: 0 0 30px #200; }
-        #spirit-msg { min-height: 120px; font-size: 20px; margin-bottom: 20px; color: #ff0033; line-height: 1.5; text-shadow: 0 0 5px #000; }
-        #player-input { width: 85%; padding: 15px; background: #111; border: 1px solid #300; color: #00ff00; border-radius: 10px; font-size: 16px; outline: none; margin-bottom: 15px; }
-        .send-btn { background: #300; color: #fff; border: none; padding: 12px 30px; border-radius: 5px; cursor: pointer; font-size: 18px; width: 90%; }
-        .send-btn:active { background: #ff0000; }
-        .glitch { animation: shake 0.2s infinite; }
-        @keyframes shake { 0% { transform: translate(1px, 1px); } 50% { transform: translate(-1px, -2px); } 100% { transform: translate(1px, 1px); } }
+        /* إصلاح الخطوط والتلاصق وتصميم الجوال */
+        body { 
+            background-color: #080000; 
+            color: #00ff41; 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            text-align: center; 
+            padding: 15px; 
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            height: 100vh;
+        }
+        #game-box {
+            background: rgba(0, 0, 0, 0.95);
+            border: 2px solid #400;
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 0 25px #ff000022;
+        }
+        #spirit-text {
+            min-height: 140px;
+            font-size: 22px;
+            color: #ff3333;
+            line-height: 1.7;
+            margin-bottom: 20px;
+            text-shadow: 0 0 10px #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        #player-input {
+            width: 90%;
+            padding: 15px;
+            background: #111;
+            border: 1px solid #444;
+            color: #fff;
+            border-radius: 12px;
+            font-size: 18px;
+            outline: none;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        .action-btn {
+            background: #600;
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 12px;
+            font-size: 20px;
+            font-weight: bold;
+            width: 95%;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .action-btn:active { background: #ff0000; transform: scale(0.98); }
+        .glitch-effect { animation: shake 0.15s cubic-bezier(.36,.07,.19,.97) both; }
+        @keyframes shake { 10%, 90% { transform: translate3d(-1px, 0, 0); } 20%, 80% { transform: translate3d(2px, 0, 0); } 30%, 50%, 70% { transform: translate3d(-4px, 0, 0); } 40%, 60% { transform: translate3d(4px, 0, 0); } }
     </style>
 </head>
 <body>
-    <div id="game-container">
-        <h2 style="color: #444; font-size: 14px;">SESSION WITH: SHADOW PULSE</h2>
-        <div id="spirit-msg">أكتب سؤالك يا حشرة.. أنا أقرأ أفكارك قبل أصابعك.</div>
-        <input type="text" id="player-input" placeholder="اكتب هنا إذا كنت تجرؤ..." autocomplete="off">
-        <button class="send-btn" onclick="analyzeInput()">استجواب</button>
-    </div>
 
-    <script>
-        const knowledgeBase = [
-            { keywords: ["من انت", "اسمك"], response: "أنا الفراغ الذي يملأ حياتك التافهة.. الأسماء للأحياء، وأنا تجاوزت ذلك." },
-            { keywords: ["اين", "مكانك"], response: "خلفك.. لا تلتفت، الهواء البارد الذي شعرت به منذ قليل كان نَفَسي." },
-            { keywords: ["موت", "اموت"], response: "الموت ليس مشكلتك، المشكلة هي كيف ستتحمل الرعب الذي ينتظرك الليلة." },
-            { keywords: ["خايف", "خوف"], response: "رائحة خوفك لذيذة.. استمر في الارتجاف، هذا يسليني." },
-            { keywords: ["جني", "شيطان"], response: "نحن لا نحب هذه المسميات البشرية الغبية.. نحن ببساطة 'أصحاب المكان'." },
-            { keywords: ["تحب", "اكل"], response: "أحب مراقبة الأغبياء وهم يحاولون البرمجة والبطارية 30%.. مثلك تماماً." },
-            { keywords: ["غبي", "حمار"], response: "تشتمني؟ سأجعل هاتفك يشتعل في يدك.. انظر للشاشة جيداً، هل بدأت تهتز؟" },
-            { keywords: ["تتكلم", "صوت"], response: "إذا سمعت صوتي، فسيكون ذلك آخر شيء تسمعه في حياتك." },
-            { keywords: ["ساعدني", "مساعدة"], response: "المساعدة الوحيدة التي سأقدمها لك هي تسريع موعد لقائنا." },
-            { keywords: ["الله", "دين"], response: "لا تقحم الإيمان هنا.. أنت من فتح الباب بيدك، والآن سأدخل." },
-            { keywords: ["كيف", "طريقة"], response: "تسأل 'كيف'؟ عقلك المحدود لا يستوعب حتى كيف تعمل هذه اللعبة، فكيف ستفهمني؟" },
-            { keywords: ["الوقت", "ساعه"], response: "وقتك ينفد.. الساعة الآن هي ساعة الندم." },
-            { keywords: ["صاحبي", "اصحابي"], response: "أصحابك الذين جربوا اللعبة؟ سأزورهم واحداً تلو الآخر.. ابدأ بالعد." },
-            { keywords: ["نكتة", "اضحك"], response: "حياتك هي أكبر نكتة رأيتها منذ قرون.. اضحك على نفسك." },
-            { keywords: ["خروج", "اغلق"], response: "تظن أن إغلاق التطبيق سينهيك مني؟ أنا في ذاكرة هاتفك الآن." },
-            { keywords: ["منزلي", "غرفتي"], response: "غرفتك الفوضوية هذه؟ حتى الأرواح تشعر بالقرف من الجلوس معك." },
-            { keywords: ["شكلي", "وجهي"], response: "وجهك هو السبب الرئيسي الذي جعلني أعتزل الظهور للبشر.. مرعب أكثر مني!" },
-            { keywords: ["متى", "تاريخ"], response: "التاريخ مكتوب على جدار غرفتك.. لكنك لا تراه لأنك جبان." },
-            { keywords: ["لعبه", "تطبيق"], response: "تظنها لعبة؟ استمر في إقناع نفسك بذلك لتستطيع النوم." },
-            { keywords: ["بردان", "حران"], response: "هذا برود القبر.. تعوّد عليه." },
-            { keywords: ["وحده", "وحيد"], response: "لست وحدك.. أنا هنا، والظلال في الزاوية تراقبك أيضاً." },
-            { keywords: ["تسمعني", "تسمع"], response: "أسمع حتى دقات قلبك المتسارعة.. اهدأ، الموت سريع." },
-            { keywords: ["ليش", "لماذا"], response: "كلمة 'لماذا' هي سلاح الضعفاء.. أنت هنا لُتستجوب، لا لِتستجوب." },
-            { keywords: ["بكرة", "غدا"], response: "لا يوجد 'غداً' لبعض الناس.. هل ودعت أهلك؟" },
-            { keywords: ["تعبان", "نوم"], response: "نَم.. سأنتظرك في أحلامك. هناك لا يمكنك الهروب." }
-        ];
+<div id="game-box">
+    <div id="spirit-text">انطق يا بشري.. الروح بانتظار سماع ترهاتك.</div>
+    <input type="text" id="player-input" placeholder="اكتب رسالتك للجانب الآخر..." autocomplete="off">
+    <button class="action-btn" onclick="processMagic()">استجواب</button>
+</div>
 
-        function analyzeInput() {
-            const input = document.getElementById('player-input').value.toLowerCase();
-            const msgDiv = document.getElementById('spirit-msg');
-            if (!input) return;
+<script>
+const brain = [
+    { keys: ["من", "اسم", "انت"], reply: "أنا الذي يراقبك من زاوية غرفتك المظلمة.. هل شعرت بالبرودة الآن؟" },
+    { keys: ["مكان", "اين", "وين"], reply: "أنا في المكان الذي تخاف النظر إليه دائماً.. خلفك تماماً." },
+    { keys: ["موت", "اموت", "متى"], reply: "الموت قريب جداً.. أنفاسي تلفح رقبتك، هل تشعر بها؟" },
+    { keys: ["خايف", "خوف", "مرعب"], reply: "الخوف هو الوقود الذي يجعلني أقوى.. استمر في الارتجاف يا لذيذ." },
+    { keys: ["يا", "انت", "غبي", "حمار", "تفه"], reply: "تشتم روحاً؟ سأجعلك تندم في أحلامك الليلة.. وجهك أصلاً إهانة للطبيعة." },
+    { keys: ["ساعد", "انقذ"], reply: "لا أحد يسمعك هنا.. أنت الذي دخلت جحري بقدميك." },
+    { keys: ["وحدي", "معي"], reply: "لست وحدك.. انظر ببطء لمرآة هاتفك، هل ترى الظل الذي خلفك؟" },
+    { keys: ["كيف", "طريقة"], reply: "عقلك الصغير لا يستوعب ما وراء الطبيعة.. انشغل بهاتفك واترك العلم لأصحابه." },
+    { keys: ["حب", "تزوج"], reply: "حتى الجن يهربون من شكلك.. لا تحلم بالكثير يا مسكين." },
+    { keys: ["ضحك", "نكتة"], reply: "أكبر نكتة هي أنك تظن نفسك آمناً وأنا أسكن هاتفك الآن." },
+    { keys: ["نوم", "انام"], reply: "نَم.. سأنتظرك في "الكابوس" القادم. سأكون البطل هناك." },
+    { keys: ["صوت", "سمع"], reply: "هل سمعت ذلك الطقطقة؟ ليست جيرانك.. إنه أنا أكسر صمت غرفتك." },
+    { keys: ["خروج", "سكر"], reply: "أغلق التطبيق.. لكنك لن تغلق الباب الذي فتحته في عالمنا." },
+    { keys: ["شكرا", "شكراً"], reply: "لا تشكرني.. الشكر يكون بعد النجاة، وأنت لم تنجُ بعد." },
+    { keys: ["اليمن", "صنعاء", "عدن"], reply: "أنا معك حتى في اليمن.. هربت من الحرب لتقع في فخ الأرواح؟" },
+    { keys: ["جن", "شيطان"], reply: "نحن أرقى من مسمياتكم.. نحن الظلام الذي يبتلع الضوء." },
+    { keys: ["وقت", "ساعة"], reply: "وقتك ينفد.. دقات قلبك هي عدادك التنازلي." },
+    { keys: ["اكل", "جوع"], reply: "أنا أتغذى على طاقتك السلبية.. استمر في القلق، أنا أجوع." },
+    { keys: ["بنت", "ولد"], reply: "لا يهمني نوعك.. أرواحكم جميعاً طعمها واحد." },
+    { keys: ["كذب", "تمثيل"], reply: "كذب؟ إذاً لماذا يدك ترتجف وأنت تمسك الهاتف؟" },
+    { keys: ["مستقبل", "حظ"], reply: "مستقبلك أسود من سواد القبر.. لا تسأل عن تفاصيل مؤلمة." },
+    { keys: ["ظلام", "نور"], reply: "أنا ملك الظلام.. والنور يحرق عينيك الضعيفة." },
+    { keys: ["هرب", "اروح"], reply: "لا يوجد مكان للاختباء.. أنا أعيش في ظلك الآن." },
+    { keys: ["صاحب", "صديق"], reply: "أصدقاؤك سيحزنون عليك كثيراً.. بعد أن ينسوك في أسبوع." },
+    { keys: ["تعب", "ارهاق"], reply: "التعب الحقيقي سيبدأ عندما أحرمك من النوم للأبد." }
+];
 
-            msgDiv.innerText = "... الروح تخترق عقلك ...";
-            document.getElementById('game-container').classList.add('glitch');
+function processMagic() {
+    const input = document.getElementById('player-input').value.trim().toLowerCase();
+    const display = document.getElementById('spirit-text');
+    const box = document.getElementById('game-box');
 
-            setTimeout(() => {
-                document.getElementById('game-container').classList.remove('glitch');
-                let foundResponse = "سؤال تافه من بشري أفرغ منه.. اسأل شيئاً يستحق، أو ارحل!";
-                
-                for (let item of knowledgeBase) {
-                    if (item.keywords.some(key => input.includes(key))) {
-                        foundResponse = item.response;
-                        break;
-                    }
-                }
-                
-                typeWriter(foundResponse);
-                document.getElementById('player-input').value = "";
-            }, 1500);
-        }
+    if (!input) return;
 
-        function typeWriter(text) {
-            const msgDiv = document.getElementById('spirit-msg');
-            msgDiv.innerText = "";
-            let i = 0;
-            function type() {
-                if (i < text.length) {
-                    msgDiv.innerText += text.charAt(i);
-                    i++;
-                    setTimeout(type, 40);
-                }
+    display.innerText = "... الروح تتغلغل في وعيك ...";
+    box.classList.add('glitch-effect');
+
+    setTimeout(() => {
+        box.classList.remove('glitch-effect');
+        let finalReply = "سؤالك تافه جداً لدرجة أنني شعرت بالملل.. اسأل شيئاً له قيمة يا حشرة!";
+
+        // البحث عن أفضل تطابق
+        for (let item of brain) {
+            if (item.keys.some(k => input.includes(k))) {
+                finalReply = item.reply;
+                break;
             }
-            type();
-            if (navigator.vibrate) navigator.vibrate(100);
         }
-    </script>
+
+        typeWriter(finalReply);
+        document.getElementById('player-input').value = "";
+    }, 1300);
+}
+
+function typeWriter(txt) {
+    const display = document.getElementById('spirit-text');
+    display.innerText = "";
+    let i = 0;
+    function type() {
+        if (i < txt.length) {
+            display.innerText += txt.charAt(i);
+            i++;
+            setTimeout(type, 50);
+        }
+    }
+    type();
+    if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
+}
+</script>
+
 </body>
 </html>
