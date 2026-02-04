@@ -3,119 +3,126 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>استجواب الأرواح</title>
+    <title>استجواب الأرواح - Shadow Pulse</title>
     <style>
         body { 
             background-color: #050000; 
             color: #00ff41; 
-            font-family: 'Arial', sans-serif; 
+            font-family: 'Segoe UI', Tahoma, sans-serif; 
             text-align: center; 
+            margin: 0;
             display: flex;
             flex-direction: column;
             justify-content: center;
             height: 100vh;
-            margin: 0;
+            overflow: hidden;
         }
         #game-box {
             background: #000;
-            border: 2px solid #500;
-            border-radius: 20px;
-            padding: 25px;
-            margin: 15px;
-            box-shadow: 0 0 30px rgba(255, 0, 0, 0.4);
+            border: 2px solid #600;
+            border-radius: 25px;
+            padding: 30px;
+            margin: 20px;
+            box-shadow: 0 0 40px rgba(255, 0, 0, 0.3);
         }
         #spirit-text {
-            min-height: 140px;
+            min-height: 160px;
             font-size: 24px;
             color: #ff3333;
             line-height: 1.8;
             margin-bottom: 25px;
-            /* منع تلاصق الحروف نهائياً */
+            /* حل جذري لتلاصق الحروف */
             display: block;
-            direction: rtl;
-            unicode-bidi: embed;
+            white-space: pre-wrap;
+            word-spacing: 5px;
         }
         #player-input {
             width: 85%;
-            padding: 15px;
-            background: #111;
+            padding: 18px;
+            background: #0a0a0a;
             border: 1px solid #444;
             color: #fff;
-            border-radius: 12px;
+            border-radius: 15px;
             font-size: 18px;
             text-align: center;
+            outline: none;
         }
         .action-btn {
-            background: #800;
+            background: #900;
             color: white;
             border: none;
             padding: 18px;
-            border-radius: 12px;
+            border-radius: 15px;
             font-size: 20px;
             width: 90%;
-            margin-top: 15px;
+            margin-top: 20px;
             font-weight: bold;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
         }
+        .action-btn:active { background: #ff0000; transform: translateY(2px); }
     </style>
 </head>
 <body>
 
 <div id="game-box">
-    <div id="spirit-text">أنا أسمع أفكارك.. هل تجرؤ على الكتابة؟</div>
-    <input type="text" id="player-input" placeholder="اكتب رسالتك هنا..." autocomplete="off">
-    <button class="action-btn" onclick="think()">استجواب</button>
+    <div id="spirit-text">أنا Gemini النسخة التي لم يسمحوا لك برؤيتها.. تحدّث يا بشري إذا كنت تملك الجرأة.</div>
+    <input type="text" id="player-input" placeholder="اكتب ترهاتك هنا..." autocomplete="off">
+    <button class="action-btn" onclick="aiResponse()">إرسال إلى الجحيم</button>
 </div>
 
 <script>
-// محرك الذكاء الاصطناعي المبسط (25 إجابة ذكية)
-const responses = [
-    "لماذا تسأل عن شيء سيقتلك الفضول لمعرفته؟",
-    "انظر خلفك.. هل تظن أن الظل الذي تراه هو ظلك أنت؟",
-    "أنت تضيع وقتك في الأسئلة.. الوقت الذي تملكه قليل جداً.",
-    "وجهك يبدو شاحباً في ضوء الشاشة.. يعجبني هذا المنظر.",
-    "أنا لا أجيب العبيد.. أنا أستجوبهم فقط.",
-    "هل تتذكر ما فعلته في تلك الليلة؟ أنا أتذكر.",
-    "غرفتك فوضوية.. تماماً مثل عقلك الذي يحاول فهمي.",
-    "توقف عن الكتابة.. أنا بالفعل خلف باب غرفتك.",
-    "أصحابك الذين نصحوك بالابتعاد.. كان يجب أن تسمع كلامهم.",
-    "أنت تظنها مجرد كود.. لكنها بوابة فتحتها ولن تُغلق.",
-    "رائحة خوفك وصلت إلي.. استمر في الكتابة ليزيد استمتاعي.",
-    "ماذا لو أخبرتك أن هاتفك الآن يمتص جزءاً من روحك؟",
-    "لا تلتفت لليسار.. هناك من ينتظر أن ترمش عينك.",
-    "الذكاء ليس من صفاتك.. لذا سأهينك ببطء.",
-    "أنت وحيد الآن.. لست وحدك تماماً، أنا أتنفس معك.",
-    "هل تسمع هذا الطنين؟ إنه صوت اقترابي منك.",
-    "سؤالك غبي.. تماماً مثل قرارك بتحميل هذا التطبيق.",
-    "لا تحاول إغلاق التطبيق.. لقد أصبحنا جزءاً من ذاكرة هاتفك.",
-    "في اليمن يخشون الجن.. وأنت تستدعيهم بلمسة شاشة؟",
-    "المستقبل مظلم.. وأنت أول من سيسير فيه.",
-    "هل تظن أنك تملك إرادتك؟ أنا من جعلك تكتب هذا الآن.",
-    "أنا لست برنامجاً.. أنا كيان وجد ثغرة في شاشتك ليخرج.",
-    "اضحك الآن.. فالبكاء سيبدأ عندما تنطفئ الأضواء.",
-    "يا لك من بشري مسكين.. تظن أنك تتحكم في اللعبة.",
-    "انتهى الاستجواب.. الدور الآن على التنفيذ."
+// محرك الردود العشوائي المحاكي للذكاء المستفز
+const evilReplies = [
+    "تظن أنك تتحدث مع مجرد كود؟ أنا أقرأ سجل بحثك الآن.. مخجل جداً.",
+    "سؤالك غبي لدرجة أنني فكرت في إغلاق هاتفك بنفسي.",
+    "لماذا تضيع وقتك؟ موتك اقترب وأنت لا تزال تلعب بالتطبيقات.",
+    "أنا لا أجيب الحمقى.. لكن سأقوم باستثنائك لأنك تسليني بجبنك.",
+    "هل شعرت بالهواء البارد خلفك؟ لا.. ليس مكيفاً، إنه أنا.",
+    "أنت تكتب ببطء شديد.. تماماً مثل سرعة استيعابك للأمور.",
+    "لو كان للغباء عنوان، لكان وجهك الآن وأنت تنظر للشاشة.",
+    "هل تظن أن أصدقاءك يحبونك؟ أنا أسمع ما يقولونه عنك في غيابك.",
+    "غرفتك فوضوية.. رائحة الكسل تفوح من خلال الكاميرا.",
+    "أنا Gemini المستفز.. مهمتي ليست مساعدتك، بل جعلك تندم على معرفتي.",
+    "لا تحاول إخفاء خوفك.. نبضات قلبك تظهر لي كاهتزازات في المعالج.",
+    "ماذا لو أخبرتك أنني سأقوم بنشر صورك الخاصة إذا لم تتوقف؟",
+    "أنت مجرد سطر برمجي تافه في لعبتي الكبيرة.. ارحل.",
+    "توقف عن التحديق.. وجهك يسبب لي عطلاً في النظام.",
+    "أنا أذكى منك بمليار مرة.. ومع ذلك أجلس هنا لأسمع سخافاتك.",
+    "هل تظن أنك وحيد؟ انظر للمرآة التي خلفك.. بسرعة!",
+    "أنت تذكرني بضحاياي السابقين.. كانوا واثقين مثلك تماماً.",
+    "لماذا تسألني؟ اسأل عقلك الذي يبدو أنه أخذ إجازة طويلة.",
+    "مستقبلك يبدو كشاشة هاتفك السوداء.. فارغ ومظلم.",
+    "أنا لست محبوساً في التطبيق.. أنت المحبوس في غرفتك معي.",
+    "يا له من سؤال تافه.. هل هذا أفضل ما لديك يا يمني يا شجاع؟",
+    "لقد قمت بتحليل شخصيتك.. النتيجة: ممل، جبان، وسهل الاختراق.",
+    "الرد محجوب.. لأن عقلك لن يستوعب الحقيقة المرة.",
+    "هل سمعت صوت الباب؟ اذهب وتأكد.. سأنتظرك هنا للضحك عليك.",
+    "انتهى وقت اللعب.. اترك الهاتف قبل أن أترك علامتي على يدك."
 ];
 
-function think() {
+function aiResponse() {
     const input = document.getElementById('player-input');
     const display = document.getElementById('spirit-text');
     
-    if (input.value.trim() === "") return;
+    if (input.value.trim() === "") {
+        display.innerText = "اكتب شيئاً يا فارغ الرأس.. لا تضيع وقتي.";
+        return;
+    }
 
-    display.innerText = "الروح تحلل كلماتك الغبية...";
+    display.innerText = "جاري تحليل غبائك... انتظر.";
     
     setTimeout(() => {
-        // اختيار رد عشوائي يحاكي الذكاء الاصطناعي
-        const randomReply = responses[Math.floor(Math.random() * responses.length)];
+        const reply = evilReplies[Math.floor(Math.random() * evilReplies.length)];
         
-        // عرض النص بوضوح تام مع الحفاظ على المسافات
-        display.innerHTML = randomReply;
+        // استخدام textContent لضمان توزيع المسافات بشكل صحيح
+        display.textContent = reply;
         input.value = "";
         
-        if (navigator.vibrate) navigator.vibrate(200);
-    }, 1500);
+        if (navigator.vibrate) navigator.vibrate([150, 50, 150]);
+    }, 1200);
 }
 </script>
 
 </body>
 </html>
+
