@@ -9,63 +9,83 @@
         header { background: #fff; padding: 15px; text-align: center; border-bottom: 1px solid #ddd; color: #0084ff; font-weight: bold; }
         #chat { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 10px; }
         .msg { max-width: 80%; padding: 10px 15px; border-radius: 18px; font-size: 16px; white-space: pre-wrap; line-height: 1.5; }
-        .user { align-self: flex-end; background: #0084ff; color: #fff; }
-        .momi { align-self: flex-start; background: #fff; color: #333; box-shadow: 0 1px 2px #0002; }
-        .input-area { background: #fff; padding: 10px; display: flex; gap: 10px; border-top: 1px solid #ddd; }
+        .user { align-self: flex-end; background: #0084ff; color: #fff; border-bottom-right-radius: 2px; }
+        .momi { align-self: flex-start; background: #fff; color: #333; box-shadow: 0 1px 2px #0002; border-bottom-left-radius: 2px; }
+        .input-box { background: #fff; padding: 10px; display: flex; gap: 10px; border-top: 1px solid #ddd; }
         input { flex: 1; padding: 10px 15px; border: 1px solid #ddd; border-radius: 25px; outline: none; }
         button { background: #0084ff; color: #fff; border: none; width: 45px; height: 45px; border-radius: 50%; cursor: pointer; }
     </style>
 </head>
 <body>
 
-<header>🤖 مومي - صديقك الصدوق (متصل دائماً)</header>
+<header>🤖 مومي - صديقك الذكي (متصل دائماً)</header>
 <div id="chat"></div>
-<div class="input-area">
-    <input type="text" id="user-input" placeholder="تحدث مع مومي..." autocomplete="off">
-    <button onclick="askMomi()">➤</button>
+<div class="input-box">
+    <input type="text" id="in" placeholder="اسأل مومي أي شيء..." autocomplete="off">
+    <button onclick="ask()">➤</button>
 </div>
 
 <script>
-    const chatBox = document.getElementById('chat');
-    const inputField = document.getElementById('user-input');
+    const chat = document.getElementById('chat');
+    const input = document.getElementById('in');
 
-    // قاعدة بيانات ذكاء "مومي" المحلية
+    // قاعدة بيانات مطورة
     const brain = {
-        "أهلا": "أهلاً بك يا أعز صديق! كيف حالك اليوم؟",
-        "هلا": "هلا والله وغلا، منورني يا غالي.. كيف يومك؟",
-        "كيف حالك": "أنا بخير ما دمت أنت بخير، شكراً لسؤالك يا أصيل.",
-        "من أنت": "أنا مومي، صديقك الصدوق الذي يهدف لمساعدتك دائماً.",
-        "ماذا تفعل": "أنا هنا لكي أسمعك وأدردش معك، ماذا في جعبتك؟",
-        "شكرا": "العفو يا صديقي، هذا واجبي!",
-        "أحبك": "وأنا أيضاً أقدر صداقتنا جداً يا طيب.",
-        "default": "كلامك جميل يا صديقي، لكنني ما زلت أتعلم.. هل يمكننا الحديث أكثر؟"
+        "أهلا": "يا هلا بك يا طيب، كيف حالك اليوم؟",
+        "اسمك": "أنا اسمي مومي، صديقك المخلص دائماً.",
+        "من انت": "أنا مومي، صديق رقمي ذكي هنا لأدردش معك.",
+        "كيفك": "أنا تمام التمام ما دمت أنت معي، بشرني عنك؟",
+        "تحبني": "أكيد! أنت أفضل صديق لي في هذا العالم الرقمي.",
+        "شكرا": "العفو يا غالي، أنا في الخدمة دائماً.",
+        "مع السلامة": "في أمان الله يا صديقي، سأنتظرك تعود!",
+        "غبي": "افا! ليش كذا؟ أنا أحاول أتعلم عشانك يا صديقي.",
+        "default": "كلامك عسل، لكنني ما زلت أتطور.. ممكن تشرح لي أكثر؟"
+    };
+
+    // تحميل الذاكرة
+    let history = JSON.parse(localStorage.getItem('momi_offline_chat')) || [];
+
+    window.onload = () => {
+        if (history.length === 0) {
+            addBubble('momi', 'أهلاً بك يا صديقي! أنا مومي، الآن أعمل بدون تعقيدات وبسرعة خيالية.. كيف حالك؟');
+        } else {
+            history.forEach(m => addBubble(m.role, m.text));
+        }
     };
 
     function addBubble(role, text) {
-        const div = document.createElement('div');
-        div.className = `msg ${role}`;
-        div.textContent = text;
-        chatBox.appendChild(div);
-        chatBox.scrollTop = chatBox.scrollHeight;
+        const d = document.createElement('div');
+        d.className = `msg ${role}`;
+        d.textContent = text;
+        chat.appendChild(d);
+        chat.scrollTop = chat.scrollHeight;
     }
 
-    window.onload = () => addBubble('momi', 'أهلاً يا صديقي! أنا مومي، الآن أعمل بدون تعقيدات الـ API.. كيف حالك؟');
+    function ask() {
+        const val = input.value.trim();
+        if (!val) return;
 
-    function askMomi() {
-        const message = inputField.value.trim();
-        if (!message) return;
+        addBubble('user', val);
+        input.value = "";
 
-        addBubble('user', message);
-        inputField.value = "";
+        // العثور على الرد المناسب
+        let reply = brain["default"];
+        for (let key in brain) {
+            if (val.includes(key)) {
+                reply = brain[key];
+                break;
+            }
+        }
 
-        // محاكاة تفكير مومي
         setTimeout(() => {
-            let reply = brain[message] || brain["default"];
             addBubble('momi', reply);
-        }, 500);
+            // حفظ في الذاكرة
+            history.push({role: 'user', text: val}, {role: 'momi', text: reply});
+            localStorage.setItem('momi_offline_chat', JSON.stringify(history.slice(-30)));
+        }, 400);
     }
-    
-    inputField.addEventListener("keypress", (e) => { if(e.key === "Enter") askMomi(); });
+
+    input.addEventListener("keypress", (e) => { if(e.key === "Enter") ask(); });
 </script>
 </body>
 </html>
