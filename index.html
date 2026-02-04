@@ -5,45 +5,90 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>استجواب الأرواح - Shadow Pulse</title>
     <style>
-        body { background-color: #0b0b0b; color: #00ff00; font-family: 'Courier New', monospace; text-align: center; padding: 20px; }
-        #game-container { border: 2px dashed #00ff00; padding: 20px; border-radius: 10px; max-width: 400px; margin: auto; background: #000; }
-        #spirit-msg { min-height: 120px; font-size: 20px; margin: 20px 0; color: #ff0055; font-weight: bold; }
-        .btn { background: #000; color: #00ff00; border: 1px solid #00ff00; padding: 15px; margin: 10px; border-radius: 5px; width: 90%; font-size: 16px; transition: 0.3s; }
-        .btn:active { background: #00ff00; color: #000; }
-        .insult { color: #ffff00; font-size: 14px; margin-top: 10px; display: block; }
+        body { background-color: #050000; color: #00ff00; font-family: 'Courier New', monospace; text-align: center; padding: 20px; }
+        #game-container { border: 2px solid #300; padding: 20px; border-radius: 15px; background: #000; max-width: 450px; margin: auto; box-shadow: 0 0 30px #200; }
+        #spirit-msg { min-height: 120px; font-size: 20px; margin-bottom: 20px; color: #ff0033; line-height: 1.5; text-shadow: 0 0 5px #000; }
+        #player-input { width: 85%; padding: 15px; background: #111; border: 1px solid #300; color: #00ff00; border-radius: 10px; font-size: 16px; outline: none; margin-bottom: 15px; }
+        .send-btn { background: #300; color: #fff; border: none; padding: 12px 30px; border-radius: 5px; cursor: pointer; font-size: 18px; width: 90%; }
+        .send-btn:active { background: #ff0000; }
+        .glitch { animation: shake 0.2s infinite; }
+        @keyframes shake { 0% { transform: translate(1px, 1px); } 50% { transform: translate(-1px, -2px); } 100% { transform: translate(1px, 1px); } }
     </style>
 </head>
 <body>
     <div id="game-container">
-        <h1>استجواب الأرواح 💀</h1>
-        <div id="spirit-msg">لماذا أيقظتني يا أحمق؟ هل تريد أن ترى نهايتك أم تسأل أسئلة غبية كالعادة؟</div>
-        <div id="options">
-            <button class="btn" onclick="ask('من أنت؟')">من أنت؟</button>
-            <button class="btn" onclick="ask('هل سأنجح في حياتي؟')">هل سأنجح في حياتي؟</button>
-            <button class="btn" onclick="ask('أين ذهبت روحي؟')">أين ذهبت روحي؟</button>
-            <button class="btn" onclick="ask('توقف عن السخرية مني')">توقف عن السخرية مني!</button>
-        </div>
+        <h2 style="color: #444; font-size: 14px;">SESSION WITH: SHADOW PULSE</h2>
+        <div id="spirit-msg">أكتب سؤالك يا حشرة.. أنا أقرأ أفكارك قبل أصابعك.</div>
+        <input type="text" id="player-input" placeholder="اكتب هنا إذا كنت تجرؤ..." autocomplete="off">
+        <button class="send-btn" onclick="analyzeInput()">استجواب</button>
     </div>
 
     <script>
-        const responses = {
-            "من أنت؟": ["أنا كابوسك الأسوأ.. وأنت مجرد بشري يرتجف من تطبيق أندرويد!", "أنا الذي يراقبك من الكاميرا الآن.. وجهك مضحك وأنت خائف.", "أنا الروح التي ستسكن هاتفك لأن منزلك ممل جداً."],
-            "هل سأنجح في حياتي؟": ["بذكائك هذا؟ حتى الجن لا يستطيعون مساعدتك.", "نجاحك الوحيد هو أنك وصلت لهذا السؤال بدون أن تبكي.", "المستقبل مظلم.. تماماً مثل غرفتك الآن يا جبان."],
-            "أين ذهبت روحي؟": ["ضاعَت وهي تبحث عن عقل في رأسك.", "خلفك الآن.. تحاول الهرب من ملابسك غير المتناسقة.", "سأحتفظ بها أنا، أنت لا تستخدمها على أي حال."],
-            "توقف عن السخرية مني!": ["أوه، هل ستبكي؟ سأخبر الشياطين أنك حساس جداً.", "أنا لا أسخر، أنا أصف الواقع المرير لشكلك الآن.", "حسناً.. سأصمت، لكن انظر تحت قدميك الآن ببطء!"]
-        };
+        const knowledgeBase = [
+            { keywords: ["من انت", "اسمك"], response: "أنا الفراغ الذي يملأ حياتك التافهة.. الأسماء للأحياء، وأنا تجاوزت ذلك." },
+            { keywords: ["اين", "مكانك"], response: "خلفك.. لا تلتفت، الهواء البارد الذي شعرت به منذ قليل كان نَفَسي." },
+            { keywords: ["موت", "اموت"], response: "الموت ليس مشكلتك، المشكلة هي كيف ستتحمل الرعب الذي ينتظرك الليلة." },
+            { keywords: ["خايف", "خوف"], response: "رائحة خوفك لذيذة.. استمر في الارتجاف، هذا يسليني." },
+            { keywords: ["جني", "شيطان"], response: "نحن لا نحب هذه المسميات البشرية الغبية.. نحن ببساطة 'أصحاب المكان'." },
+            { keywords: ["تحب", "اكل"], response: "أحب مراقبة الأغبياء وهم يحاولون البرمجة والبطارية 30%.. مثلك تماماً." },
+            { keywords: ["غبي", "حمار"], response: "تشتمني؟ سأجعل هاتفك يشتعل في يدك.. انظر للشاشة جيداً، هل بدأت تهتز؟" },
+            { keywords: ["تتكلم", "صوت"], response: "إذا سمعت صوتي، فسيكون ذلك آخر شيء تسمعه في حياتك." },
+            { keywords: ["ساعدني", "مساعدة"], response: "المساعدة الوحيدة التي سأقدمها لك هي تسريع موعد لقائنا." },
+            { keywords: ["الله", "دين"], response: "لا تقحم الإيمان هنا.. أنت من فتح الباب بيدك، والآن سأدخل." },
+            { keywords: ["كيف", "طريقة"], response: "تسأل 'كيف'؟ عقلك المحدود لا يستوعب حتى كيف تعمل هذه اللعبة، فكيف ستفهمني؟" },
+            { keywords: ["الوقت", "ساعه"], response: "وقتك ينفد.. الساعة الآن هي ساعة الندم." },
+            { keywords: ["صاحبي", "اصحابي"], response: "أصحابك الذين جربوا اللعبة؟ سأزورهم واحداً تلو الآخر.. ابدأ بالعد." },
+            { keywords: ["نكتة", "اضحك"], response: "حياتك هي أكبر نكتة رأيتها منذ قرون.. اضحك على نفسك." },
+            { keywords: ["خروج", "اغلق"], response: "تظن أن إغلاق التطبيق سينهيك مني؟ أنا في ذاكرة هاتفك الآن." },
+            { keywords: ["منزلي", "غرفتي"], response: "غرفتك الفوضوية هذه؟ حتى الأرواح تشعر بالقرف من الجلوس معك." },
+            { keywords: ["شكلي", "وجهي"], response: "وجهك هو السبب الرئيسي الذي جعلني أعتزل الظهور للبشر.. مرعب أكثر مني!" },
+            { keywords: ["متى", "تاريخ"], response: "التاريخ مكتوب على جدار غرفتك.. لكنك لا تراه لأنك جبان." },
+            { keywords: ["لعبه", "تطبيق"], response: "تظنها لعبة؟ استمر في إقناع نفسك بذلك لتستطيع النوم." },
+            { keywords: ["بردان", "حران"], response: "هذا برود القبر.. تعوّد عليه." },
+            { keywords: ["وحده", "وحيد"], response: "لست وحدك.. أنا هنا، والظلال في الزاوية تراقبك أيضاً." },
+            { keywords: ["تسمعني", "تسمع"], response: "أسمع حتى دقات قلبك المتسارعة.. اهدأ، الموت سريع." },
+            { keywords: ["ليش", "لماذا"], response: "كلمة 'لماذا' هي سلاح الضعفاء.. أنت هنا لُتستجوب، لا لِتستجوب." },
+            { keywords: ["بكرة", "غدا"], response: "لا يوجد 'غداً' لبعض الناس.. هل ودعت أهلك؟" },
+            { keywords: ["تعبان", "نوم"], response: "نَم.. سأنتظرك في أحلامك. هناك لا يمكنك الهروب." }
+        ];
 
-        function ask(question) {
+        function analyzeInput() {
+            const input = document.getElementById('player-input').value.toLowerCase();
             const msgDiv = document.getElementById('spirit-msg');
-            msgDiv.innerText = "... الروح تفكر في إهانة مناسبة ...";
-            
+            if (!input) return;
+
+            msgDiv.innerText = "... الروح تخترق عقلك ...";
+            document.getElementById('game-container').classList.add('glitch');
+
             setTimeout(() => {
-                const r = responses[question];
-                msgDiv.innerText = r[Math.floor(Math.random() * r.length)];
+                document.getElementById('game-container').classList.remove('glitch');
+                let foundResponse = "سؤال تافه من بشري أفرغ منه.. اسأل شيئاً يستحق، أو ارحل!";
                 
-                // إضافة اهتزاز للهاتف إذا كان مدعوماً
-                if (navigator.vibrate) navigator.vibrate(200);
-            }, 1200);
+                for (let item of knowledgeBase) {
+                    if (item.keywords.some(key => input.includes(key))) {
+                        foundResponse = item.response;
+                        break;
+                    }
+                }
+                
+                typeWriter(foundResponse);
+                document.getElementById('player-input').value = "";
+            }, 1500);
+        }
+
+        function typeWriter(text) {
+            const msgDiv = document.getElementById('spirit-msg');
+            msgDiv.innerText = "";
+            let i = 0;
+            function type() {
+                if (i < text.length) {
+                    msgDiv.innerText += text.charAt(i);
+                    i++;
+                    setTimeout(type, 40);
+                }
+            }
+            type();
+            if (navigator.vibrate) navigator.vibrate(100);
         }
     </script>
 </body>
