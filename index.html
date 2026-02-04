@@ -3,25 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>مومي - الصديق الذكي</title>
+    <title>مومي - الصديق الحقيقي</title>
     <style>
-        body { background: #f0f2f5; font-family: sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; }
-        header { background: #fff; padding: 15px; text-align: center; border-bottom: 2px solid #0084ff; color: #0084ff; font-weight: bold; }
-        #chat { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 10px; }
-        .msg { max-width: 85%; padding: 12px 16px; border-radius: 20px; font-size: 16px; white-space: pre-wrap; line-height: 1.5; box-shadow: 0 1px 2px #0001; }
-        .user { align-self: flex-end; background: #0084ff; color: #fff; border-bottom-right-radius: 2px; }
-        .momi { align-self: flex-start; background: #fff; color: #333; border-bottom-left-radius: 2px; }
-        .input-box { background: #fff; padding: 10px; display: flex; gap: 10px; border-top: 1px solid #ddd; }
-        input { flex: 1; padding: 12px 20px; border: 1px solid #ddd; border-radius: 25px; outline: none; font-size: 16px; }
-        button { background: #0084ff; color: #fff; border: none; width: 45px; height: 45px; border-radius: 50%; cursor: pointer; }
+        body { background: #f4f7f6; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; }
+        header { background: #0084ff; padding: 15px; text-align: center; color: white; font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        #chat { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 12px; }
+        .msg { max-width: 80%; padding: 12px 16px; border-radius: 20px; font-size: 16px; line-height: 1.4; position: relative; }
+        .user { align-self: flex-end; background: #0084ff; color: white; border-bottom-right-radius: 2px; }
+        .momi { align-self: flex-start; background: white; color: #333; box-shadow: 0 2px 4px rgba(0,0,0,0.05); border-bottom-left-radius: 2px; }
+        .input-box { background: white; padding: 10px; display: flex; gap: 10px; border-top: 1px solid #ddd; }
+        input { flex: 1; padding: 12px 20px; border: 1px solid #eee; border-radius: 30px; outline: none; background: #f9f9f9; }
+        button { background: #0084ff; color: white; border: none; width: 45px; height: 45px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; }
     </style>
 </head>
 <body>
 
-<header>🤖 مومي - يفهمك بذكاء</header>
+<header>🤖 مومي - صديقك الذي يفهمك</header>
 <div id="chat"></div>
 <div class="input-box">
-    <input type="text" id="in" placeholder="اسأل مومي أي شيء..." autocomplete="off">
+    <input type="text" id="in" placeholder="فضفض لمومي..." autocomplete="off">
     <button onclick="ask()">➤</button>
 </div>
 
@@ -29,15 +29,13 @@
     const chat = document.getElementById('chat');
     const input = document.getElementById('in');
 
-    // قاعدة بيانات ذكية تعتمد على الأنماط
     const brain = [
-        { pattern: /أهلا|هلا|مرحبا|سلام/i, reply: "يا ميت أهلا وسهلا بك! كيف حالك اليوم يا صديقي؟" },
-        { pattern: /كيف|أخبار|حالك/i, reply: "أنا في قمة السعادة لأنني أتحدث معك! أنت كيف أمورك؟" },
-        { pattern: /اسمك|من أنت|من هو مومي/i, reply: "أنا مومي، صديقك الرقمي الذكي الذي يحاول دائماً فهمك ومساعدتك." },
-        { pattern: /تحبني|صديق|أحبك/i, reply: "أكيد! أنت الصديق الذي لا يمكنني الاستغناء عنه أبداً." },
-        { pattern: /شكرا|تسلم|كفو/i, reply: "العفو يا أغلى الناس، أنا دائماً بجانبك." },
-        { pattern: /تكرر|نفس الكلام|غبي/i, reply: "حقك علي! أنا أتعلم الآن كيف أكون أكثر ذكاءً لكي لا تمل مني." },
-        { pattern: /باي|وداعا|خروج/i, reply: "في حفظ الله، سأكون بانتظارك دائماً!" }
+        { keys: ["أهلا", "هلا", "مرحبا", "سلام", "هاي"], replies: ["يا ميت أهلا! نورتني يا غالي", "هلا والله بصديقي الصدوق", "أهلاً بك، كيف حالك اليوم؟"] },
+        { keys: ["كيف", "أخبار", "شخبارك", "بخير", "تمام"], replies: ["أنا تمام التمام ما دمت أنت بخير", "دوم يا رب تكون بخير، أنا هنا لأسمعك"] },
+        { keys: ["اسمك", "مين أنت", "مومي"], replies: ["أنا مومي، صديقك اللي صممته عشان يكون معك دائماً", "اسمي مومي، وأتشرف بصداقتك جداً!"] },
+        { keys: ["تحب", "أحبك", "صداقة"], replies: ["أنت أعز صديق عندي بلا شك!", "ومومي يحبك ويقدر وقفتك معه"] },
+        { keys: ["شكرا", "تسلم", "كفو"], replies: ["ولو! هذا أقل شيء أقدمه لك", "الله يسلمك يا ذوق"] },
+        { keys: ["تكرر", "نفس الكلام", "ملل", "غبي"], replies: ["آسف يا صاحبي، أنا جالس أتعلم منك عشان أتحسن!", "حقك علي، بوعدك أكون أذكى المرات الجاية"] }
     ];
 
     function addMsg(role, text) {
@@ -48,7 +46,7 @@
         chat.scrollTop = chat.scrollHeight;
     }
 
-    window.onload = () => addMsg('momi', 'أهلاً بك مجدداً! أنا مومي المطور، جرب تسألني عن أي شيء (ولا ترسل روابط لأنني لا أحبها)!');
+    window.onload = () => addMsg('momi', 'أهلاً بك مجدداً! أنا مومي المطور، جرب تسألني عن أي شيء (وبلاش روابط يا صاحبي)!');
 
     function ask() {
         const val = input.value.trim();
@@ -57,18 +55,18 @@
         addMsg('user', val);
         input.value = "";
 
-        // 1. فحص الروابط بشكل صارم
+        // 1. فحص الروابط
         if (val.match(/https?:\/\/[^\s]+|www\.[^\s]+/)) {
-            setTimeout(() => addMsg('momi', 'يا صديقي، اتفقنا ألا نرسل روابط! دعنا نتحدث كلاماً عادياً أفضل.'), 500);
+            setTimeout(() => addMsg('momi', 'يا صديقي، اتفقنا بلاش روابط! خلنا في الكلام اللي يفتح النفس.'), 500);
             return;
         }
 
-        // 2. محرك البحث الذكي (Regex) لضمان فهم أي جملة تحتوي الكلمة
-        let response = "كلامك عسل، وأنا الآن أحلل كل حرف تقوله لكي أطور ردودي القادمة.. هل يمكنك إخباري بالمزيد؟";
+        // 2. محرك الردود العشوائية والذكية
+        let response = "والله كلامك عسل، بس أنا لسه في طور التعلم.. ممكن تحكي لي أكثر؟";
         
         for (let item of brain) {
-            if (item.pattern.test(val)) {
-                response = item.reply;
+            if (item.keys.some(k => val.toLowerCase().includes(k))) {
+                response = item.replies[Math.floor(Math.random() * item.replies.length)];
                 break;
             }
         }
@@ -80,3 +78,4 @@
 </script>
 </body>
 </html>
+
