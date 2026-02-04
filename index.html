@@ -3,17 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>مومي - الصديق الذكي</title>
+    <title>مومي - صديقك الذكي</title>
     <style>
-        body { background: #f0f2f5; font-family: sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; }
+        body { background: #f4f7f6; font-family: sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; }
         header { background: #fff; padding: 15px; text-align: center; border-bottom: 1px solid #ddd; color: #0084ff; font-weight: bold; }
         #chat { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 10px; }
-        .msg { max-width: 80%; padding: 10px 15px; border-radius: 18px; font-size: 16px; white-space: pre-wrap; }
-        .user { align-self: flex-end; background: #0084ff; color: #fff; }
-        .momi { align-self: flex-start; background: #fff; color: #333; box-shadow: 0 1px 2px #0002; }
-        .input-box { background: #fff; padding: 10px; display: flex; gap: 10px; border-top: 1px solid #ddd; }
-        input { flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 20px; outline: none; }
-        button { background: #0084ff; color: #fff; border: none; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; }
+        .msg { max-width: 80%; padding: 10px 15px; border-radius: 18px; font-size: 16px; white-space: pre-wrap; line-height: 1.5; }
+        .user { align-self: flex-end; background: #0084ff; color: #fff; border-bottom-right-radius: 2px; }
+        .momi { align-self: flex-start; background: #fff; color: #333; box-shadow: 0 1px 2px #0002; border-bottom-left-radius: 2px; }
+        .input-box { background: #fff; padding: 12px; display: flex; gap: 10px; border-top: 1px solid #ddd; }
+        input { flex: 1; padding: 10px 15px; border: 1px solid #ddd; border-radius: 25px; outline: none; font-size: 16px; }
+        button { background: #0084ff; color: #fff; border: none; width: 45px; height: 45px; border-radius: 50%; cursor: pointer; font-size: 20px; }
     </style>
 </head>
 <body>
@@ -21,19 +21,21 @@
 <header>🤖 مومي - صديقك الصدوق</header>
 <div id="chat"></div>
 <div class="input-box">
-    <input type="text" id="in" placeholder="اكتب هنا..." autocomplete="off">
+    <input type="text" id="in" placeholder="تحدث مع مومي..." autocomplete="off">
     <button onclick="ask()">➤</button>
 </div>
 
 <script>
-    const KEY = "AIzaSyD_3VdZfbt1BSj7vYnAcy6-cNRRWmajFTQ"; // مفتاحك من الصورة
+    // المفتاح المستخرج من لقطة الشاشة الخاصة بك
+    const API_KEY = "AIzaSyD_3VdZfbt1BSj7vYnAcy6-cNRRWmajFTQ"; 
+
     const chat = document.getElementById('chat');
     const input = document.getElementById('in');
 
-    // تحميل الرسائل المحفوظة
-    let history = JSON.parse(localStorage.getItem('m_v1')) || [];
+    // تحميل المحادثة من الذاكرة
+    let history = JSON.parse(localStorage.getItem('momi_chat')) || [];
     window.onload = () => {
-        if (history.length === 0) addBubble('momi', 'أهلاً! أنا مومي، كيف أساعدك؟');
+        if (history.length === 0) addBubble('momi', 'أهلاً يا صديقي! أنا مومي، كيف أساعدك اليوم؟');
         else history.forEach(m => addBubble(m.role, m.text));
     };
 
@@ -53,26 +55,35 @@
         input.value = "";
 
         try {
-            const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${KEY}`, {
+            // استخدام رابط الـ API الصحيح والمباشر لـ Gemini
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
+            
+            const response = await fetch(url, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    contents: [{ parts: [{ text: `أنت صديق ذكي اسمك مومي. رد بلهجة يمنية على: ${val}` }] }]
+                    contents: [{
+                        parts: [{ text: `أنت صديق ذكي ومخلص اسمه مومي. رد بلطف وبالعامية اليمنية على: ${val}` }]
+                    }]
                 })
             });
 
-            const data = await res.json();
-            const reply = data.candidates[0].content.parts[0].text;
+            const data = await response.json();
 
-            addBubble('momi', reply);
-            
-            history.push({role: 'user', text: val}, {role: 'momi', text: reply});
-            localStorage.setItem('m_v1', JSON.stringify(history.slice(-20)));
+            if (data.candidates && data.candidates[0].content) {
+                const reply = data.candidates[0].content.parts[0].text;
+                addBubble('momi', reply);
+                
+                // حفظ المحادثة
+                history.push({role: 'user', text: val}, {role: 'momi', text: reply});
+                localStorage.setItem('momi_chat', JSON.stringify(history.slice(-20)));
+            } else {
+                addBubble('momi', 'يا صديقي، هناك مشكلة في صلاحية المفتاح أو الحصة المجانية.');
+            }
         } catch (e) {
-            addBubble('momi', 'حدث خطأ. تأكد من الإنترنت أو صلاحية المفتاح.');
+            addBubble('momi', 'حدث خطأ في الاتصال. تأكد من جودة الإنترنت.');
         }
     }
 </script>
 </body>
 </html>
-
