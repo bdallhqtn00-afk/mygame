@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>استجواب الأرواح - Shadow Pulse</title>
+    <title>استجواب الأرواح</title>
     <style>
         body { 
-            background-color: #080000; 
+            background-color: #050000; 
             color: #00ff41; 
-            font-family: sans-serif; 
+            font-family: 'Tahoma', sans-serif; 
             text-align: center; 
-            padding: 15px; 
+            padding: 20px; 
             margin: 0;
             display: flex;
             flex-direction: column;
@@ -18,48 +18,44 @@
             height: 100vh;
         }
         #game-box {
-            background: rgba(0, 0, 0, 0.95);
+            background: #000;
             border: 2px solid #400;
             border-radius: 20px;
             padding: 25px;
-            box-shadow: 0 0 25px rgba(255, 0, 0, 0.2);
+            box-shadow: 0 0 20px rgba(255, 0, 0, 0.3);
         }
         #spirit-text {
-            min-height: 140px;
-            font-size: 22px;
+            min-height: 150px;
+            font-size: 24px; /* حجم خط أكبر للوضوح */
             color: #ff3333;
-            line-height: 1.7;
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            line-height: 1.8;
+            margin-bottom: 25px;
+            /* حل مشكلة التلاصق */
+            white-space: normal; 
+            word-spacing: 4px; 
+            display: block;
         }
         #player-input {
-            width: 90%;
+            width: 85%;
             padding: 15px;
             background: #111;
             border: 1px solid #444;
             color: #fff;
             border-radius: 12px;
             font-size: 18px;
-            outline: none;
             margin-bottom: 15px;
             text-align: center;
         }
         .action-btn {
-            background: #600;
+            background: #700;
             color: white;
             border: none;
-            padding: 15px;
+            padding: 16px;
             border-radius: 12px;
             font-size: 20px;
-            font-weight: bold;
-            width: 95%;
+            width: 90%;
             cursor: pointer;
         }
-        .action-btn:active { background: #ff0000; }
-        .glitch { animation: shake 0.1s infinite; }
-        @keyframes shake { 0% { transform: translate(1px, 1px); } 50% { transform: translate(-1px, -2px); } }
     </style>
 </head>
 <body>
@@ -71,23 +67,13 @@
 </div>
 
 <script>
-// قائمة الردود الذكية (تم إصلاح أخطاء علامات التنصيص)
 const brain = [
     { keys: ["من", "اسم", "انت"], reply: "أنا الذي يراقبك من زاوية غرفتك المظلمة.. هل شعرت بالبرودة الآن؟" },
     { keys: ["مكان", "اين", "وين"], reply: "أنا في المكان الذي تخاف النظر إليه دائماً.. خلفك تماماً." },
     { keys: ["موت", "اموت", "متى"], reply: "الموت قريب جداً.. أنفاسي تلفح رقبتك، هل تشعر بها؟" },
-    { keys: ["خايف", "خوف", "مرعب"], reply: "الخوف هو الوقود الذي يجعلني أقوى.. استمر في الارتجاف يا لذيذ." },
-    { keys: ["يا", "انت", "غبي", "حمار", "تفه"], reply: "تشتم روحاً؟ سأجعلك تندم في أحلامك الليلة.. وجهك أصلاً إهانة للطبيعة." },
-    { keys: ["ساعد", "انقذ"], reply: "لا أحد يسمعك هنا.. أنت الذي دخلت جحري بقدميك." },
-    { keys: ["وحدي", "معي"], reply: "لست وحدك.. انظر ببطء لمرآة هاتفك، هل ترى الظل الذي خلفك؟" },
-    { keys: ["كيف", "طريقة"], reply: "عقلك الصغير لا يستوعب ما وراء الطبيعة.. انشغل بهاتفك واترك العلم لأصحابه." },
-    { keys: ["حب", "تزوج"], reply: "حتى الجن يهربون من شكلك.. لا تحلم بالكثير يا مسكين." },
-    { keys: ["ضحك", "نكتة"], reply: "أكبر نكتة هي أنك تظن نفسك آمناً وأنا أسكن هاتفك الآن." },
-    { keys: ["نوم", "انام"], reply: "نَم.. سأنتظرك في كابوسك القادم. سأكون البطل هناك." },
-    { keys: ["صوت", "سمع"], reply: "هل سمعت ذلك الطقطقة؟ ليست جيرانك.. إنه أنا أكسر صمت غرفتك." },
-    { keys: ["خروج", "سكر"], reply: "أغلق التطبيق.. لكنك لن تغلق الباب الذي فتحته في عالمنا." },
-    { keys: ["اليمن", "صنعاء", "عدن"], reply: "أنا معك حتى في اليمن.. هربت من الحرب لتقع في فخ الأرواح؟" },
-    { keys: ["مستقبل", "حظ"], reply: "مستقبلك أسود من سواد القبر.. لا تسأل عن تفاصيل مؤلمة." }
+    { keys: ["خايف", "خوف"], reply: "الخوف هو الوقود الذي يجعلني أقوى.. استمر في الارتجاف يا لذيذ." },
+    { keys: ["غبي", "حمار", "تفه"], reply: "تشتم روحاً؟ وجهك أصلاً إهانة للطبيعة.. سأزورك الليلة." },
+    { keys: ["وحدي", "معي"], reply: "لست وحدك.. انظر ببطء لمرآة هاتفك، هل ترى الظل الذي خلفك؟" }
 ];
 
 let typing = false;
@@ -96,48 +82,42 @@ function processMagic() {
     if (typing) return;
     const inputVal = document.getElementById('player-input').value.trim().toLowerCase();
     const display = document.getElementById('spirit-text');
-    const box = document.getElementById('game-box');
 
-    if (!inputVal) {
-        display.innerText = "اكتب شيئاً أولاً.. أم أن لسانك تجمد من الخوف؟";
-        return;
-    }
+    if (!inputVal) return;
 
     typing = true;
     display.innerText = "... الروح تخترق وعيك الآن ...";
-    box.classList.add('glitch');
 
     setTimeout(() => {
-        box.classList.remove('glitch');
-        let finalReply = "سؤال تافه من بشري أفرغ منه.. اسأل شيئاً يستحق، أو ارحل!";
-
+        let finalReply = "سؤال تافه.. اسأل شيئاً يستحق، أو ارحل!";
         for (let item of brain) {
             if (item.keys.some(k => inputVal.includes(k))) {
                 finalReply = item.reply;
                 break;
             }
         }
-
         typeWriter(finalReply);
         document.getElementById('player-input').value = "";
-    }, 1200);
+    }, 1000);
 }
 
+// تعديل دالة الكتابة لضمان المسافات
 function typeWriter(txt) {
     const display = document.getElementById('spirit-text');
     display.innerText = "";
     let i = 0;
+    
     function type() {
         if (i < txt.length) {
+            // إضافة الحرف مع التأكد من معالجة المسافات
             display.innerText += txt.charAt(i);
             i++;
-            setTimeout(type, 50);
+            setTimeout(type, 40);
         } else {
             typing = false;
         }
     }
     type();
-    if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
 }
 </script>
 
