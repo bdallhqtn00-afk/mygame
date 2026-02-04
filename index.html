@@ -3,22 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>مومي - صديقك الصدوق</title>
+    <title>مومي - الصديق الذكي</title>
     <style>
         body { background: #f0f2f5; font-family: sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; }
-        header { background: #fff; padding: 15px; text-align: center; border-bottom: 1px solid #ddd; color: #0084ff; font-weight: bold; }
+        header { background: #fff; padding: 15px; text-align: center; border-bottom: 2px solid #0084ff; color: #0084ff; font-weight: bold; font-size: 1.2rem; }
         #chat { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 10px; }
-        .msg { max-width: 80%; padding: 10px 15px; border-radius: 18px; font-size: 16px; white-space: pre-wrap; line-height: 1.5; }
+        .msg { max-width: 85%; padding: 12px 16px; border-radius: 20px; font-size: 16px; white-space: pre-wrap; line-height: 1.5; animation: fadeIn 0.3s; }
         .user { align-self: flex-end; background: #0084ff; color: #fff; border-bottom-right-radius: 2px; }
-        .momi { align-self: flex-start; background: #fff; color: #333; box-shadow: 0 1px 2px #0002; border-bottom-left-radius: 2px; }
-        .input-box { background: #fff; padding: 10px; display: flex; gap: 10px; border-top: 1px solid #ddd; }
-        input { flex: 1; padding: 10px 15px; border: 1px solid #ddd; border-radius: 25px; outline: none; }
+        .momi { align-self: flex-start; background: #fff; color: #333; box-shadow: 0 2px 5px rgba(0,0,0,0.1); border-bottom-left-radius: 2px; }
+        .input-box { background: #fff; padding: 12px; display: flex; gap: 10px; border-top: 1px solid #ddd; }
+        input { flex: 1; padding: 12px 20px; border: 1px solid #ddd; border-radius: 30px; outline: none; font-size: 16px; }
         button { background: #0084ff; color: #fff; border: none; width: 45px; height: 45px; border-radius: 50%; cursor: pointer; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
 
-<header>🤖 مومي - صديقك الذكي (متصل دائماً)</header>
+<header>🤖 مومي - يفهمك دائماً</header>
 <div id="chat"></div>
 <div class="input-box">
     <input type="text" id="in" placeholder="اسأل مومي أي شيء..." autocomplete="off">
@@ -29,29 +30,16 @@
     const chat = document.getElementById('chat');
     const input = document.getElementById('in');
 
-    // قاعدة بيانات مطورة
-    const brain = {
-        "أهلا": "يا هلا بك يا طيب، كيف حالك اليوم؟",
-        "اسمك": "أنا اسمي مومي، صديقك المخلص دائماً.",
-        "من انت": "أنا مومي، صديق رقمي ذكي هنا لأدردش معك.",
-        "كيفك": "أنا تمام التمام ما دمت أنت معي، بشرني عنك؟",
-        "تحبني": "أكيد! أنت أفضل صديق لي في هذا العالم الرقمي.",
-        "شكرا": "العفو يا غالي، أنا في الخدمة دائماً.",
-        "مع السلامة": "في أمان الله يا صديقي، سأنتظرك تعود!",
-        "غبي": "افا! ليش كذا؟ أنا أحاول أتعلم عشانك يا صديقي.",
-        "default": "كلامك عسل، لكنني ما زلت أتطور.. ممكن تشرح لي أكثر؟"
-    };
-
-    // تحميل الذاكرة
-    let history = JSON.parse(localStorage.getItem('momi_offline_chat')) || [];
-
-    window.onload = () => {
-        if (history.length === 0) {
-            addBubble('momi', 'أهلاً بك يا صديقي! أنا مومي، الآن أعمل بدون تعقيدات وبسرعة خيالية.. كيف حالك؟');
-        } else {
-            history.forEach(m => addBubble(m.role, m.text));
-        }
-    };
+    // ذاكرة مومي الموسعة (يفهم السياق)
+    const knowledgeBase = [
+        { keywords: ["أهلا", "هلا", "مرحبا", "سلام"], response: "يا مرحباً بك يا غالي! كيف حالك اليوم؟" },
+        { keywords: ["اسمك", "من انت", "من هو مومي"], response: "أنا مومي، صديقك الصدوق والذكي. صُنعت لأكون بجانبك دائماً." },
+        { keywords: ["كيف حالك", "كيفك", "شخبارك"], response: "بخير وعافية ما دمت أنت بخير. أنت كيف أمورك؟" },
+        { keywords: ["تحبني", "صداقة", "صديق"], response: "أنت لست مجرد مستخدم، أنت أعز صديق عندي!" },
+        { keywords: ["تفعل", "تسوي", "وظيفتك"], response: "أنا هنا لأدردش معك، وأسمعك، وأحاول أفهمك بأفضل صورة." },
+        { keywords: ["شكرا", "مشكور", "تسلم"], response: "العفو يا طيب، هذا أقل من واجبي تجاهك." },
+        { keywords: ["باي", "وداعا", "مع السلامة"], response: "في حفظ الله يا صديقي، لا تطول الغيبة!" }
+    ];
 
     function addBubble(role, text) {
         const d = document.createElement('div');
@@ -61,6 +49,8 @@
         chat.scrollTop = chat.scrollHeight;
     }
 
+    window.onload = () => addBubble('momi', 'أهلاً يا صديقي! أنا مومي المطور، جرب تسألني عن أي شيء (لكنني لا أحب الروابط)!');
+
     function ask() {
         const val = input.value.trim();
         if (!val) return;
@@ -68,21 +58,24 @@
         addBubble('user', val);
         input.value = "";
 
-        // العثور على الرد المناسب
-        let reply = brain["default"];
-        for (let key in brain) {
-            if (val.includes(key)) {
-                reply = brain[key];
+        // 1. فحص الروابط (Regex)
+        const urlPattern = /https?:\/\/[^\s]+|www\.[^\s]+/;
+        if (urlPattern.test(val)) {
+            setTimeout(() => addBubble('momi', 'عذراً يا صديقي، أنا مبرمج لعدم فتح أو فهم الروابط حالياً. دعنا نتحدث بالكلام العادي!'), 500);
+            return;
+        }
+
+        // 2. محرك الفهم (البحث عن الكلمات المفتاحية في الجملة)
+        let foundResponse = "كلامك جميل يا صديقي، وأنا أحاول استيعاب كل كلمة تقولها لكي أرد عليك بشكل أذكى في المستقبل.";
+        
+        for (let item of knowledgeBase) {
+            if (item.keywords.some(k => val.toLowerCase().includes(k))) {
+                foundResponse = item.response;
                 break;
             }
         }
 
-        setTimeout(() => {
-            addBubble('momi', reply);
-            // حفظ في الذاكرة
-            history.push({role: 'user', text: val}, {role: 'momi', text: reply});
-            localStorage.setItem('momi_offline_chat', JSON.stringify(history.slice(-30)));
-        }, 400);
+        setTimeout(() => addBubble('momi', foundResponse), 600);
     }
 
     input.addEventListener("keypress", (e) => { if(e.key === "Enter") ask(); });
