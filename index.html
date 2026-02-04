@@ -5,11 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>استجواب الأرواح - Shadow Pulse</title>
     <style>
-        /* إصلاح الخطوط والتلاصق وتصميم الجوال */
         body { 
             background-color: #080000; 
             color: #00ff41; 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            font-family: sans-serif; 
             text-align: center; 
             padding: 15px; 
             margin: 0;
@@ -23,7 +22,7 @@
             border: 2px solid #400;
             border-radius: 20px;
             padding: 25px;
-            box-shadow: 0 0 25px #ff000022;
+            box-shadow: 0 0 25px rgba(255, 0, 0, 0.2);
         }
         #spirit-text {
             min-height: 140px;
@@ -31,7 +30,6 @@
             color: #ff3333;
             line-height: 1.7;
             margin-bottom: 20px;
-            text-shadow: 0 0 10px #000;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -52,17 +50,16 @@
             background: #600;
             color: white;
             border: none;
-            padding: 15px 40px;
+            padding: 15px;
             border-radius: 12px;
             font-size: 20px;
             font-weight: bold;
             width: 95%;
             cursor: pointer;
-            transition: 0.2s;
         }
-        .action-btn:active { background: #ff0000; transform: scale(0.98); }
-        .glitch-effect { animation: shake 0.15s cubic-bezier(.36,.07,.19,.97) both; }
-        @keyframes shake { 10%, 90% { transform: translate3d(-1px, 0, 0); } 20%, 80% { transform: translate3d(2px, 0, 0); } 30%, 50%, 70% { transform: translate3d(-4px, 0, 0); } 40%, 60% { transform: translate3d(4px, 0, 0); } }
+        .action-btn:active { background: #ff0000; }
+        .glitch { animation: shake 0.1s infinite; }
+        @keyframes shake { 0% { transform: translate(1px, 1px); } 50% { transform: translate(-1px, -2px); } }
     </style>
 </head>
 <body>
@@ -74,6 +71,7 @@
 </div>
 
 <script>
+// قائمة الردود الذكية (تم إصلاح أخطاء علامات التنصيص)
 const brain = [
     { keys: ["من", "اسم", "انت"], reply: "أنا الذي يراقبك من زاوية غرفتك المظلمة.. هل شعرت بالبرودة الآن؟" },
     { keys: ["مكان", "اين", "وين"], reply: "أنا في المكان الذي تخاف النظر إليه دائماً.. خلفك تماماً." },
@@ -85,40 +83,36 @@ const brain = [
     { keys: ["كيف", "طريقة"], reply: "عقلك الصغير لا يستوعب ما وراء الطبيعة.. انشغل بهاتفك واترك العلم لأصحابه." },
     { keys: ["حب", "تزوج"], reply: "حتى الجن يهربون من شكلك.. لا تحلم بالكثير يا مسكين." },
     { keys: ["ضحك", "نكتة"], reply: "أكبر نكتة هي أنك تظن نفسك آمناً وأنا أسكن هاتفك الآن." },
-    { keys: ["نوم", "انام"], reply: "نَم.. سأنتظرك في "الكابوس" القادم. سأكون البطل هناك." },
+    { keys: ["نوم", "انام"], reply: "نَم.. سأنتظرك في كابوسك القادم. سأكون البطل هناك." },
     { keys: ["صوت", "سمع"], reply: "هل سمعت ذلك الطقطقة؟ ليست جيرانك.. إنه أنا أكسر صمت غرفتك." },
     { keys: ["خروج", "سكر"], reply: "أغلق التطبيق.. لكنك لن تغلق الباب الذي فتحته في عالمنا." },
-    { keys: ["شكرا", "شكراً"], reply: "لا تشكرني.. الشكر يكون بعد النجاة، وأنت لم تنجُ بعد." },
     { keys: ["اليمن", "صنعاء", "عدن"], reply: "أنا معك حتى في اليمن.. هربت من الحرب لتقع في فخ الأرواح؟" },
-    { keys: ["جن", "شيطان"], reply: "نحن أرقى من مسمياتكم.. نحن الظلام الذي يبتلع الضوء." },
-    { keys: ["وقت", "ساعة"], reply: "وقتك ينفد.. دقات قلبك هي عدادك التنازلي." },
-    { keys: ["اكل", "جوع"], reply: "أنا أتغذى على طاقتك السلبية.. استمر في القلق، أنا أجوع." },
-    { keys: ["بنت", "ولد"], reply: "لا يهمني نوعك.. أرواحكم جميعاً طعمها واحد." },
-    { keys: ["كذب", "تمثيل"], reply: "كذب؟ إذاً لماذا يدك ترتجف وأنت تمسك الهاتف؟" },
-    { keys: ["مستقبل", "حظ"], reply: "مستقبلك أسود من سواد القبر.. لا تسأل عن تفاصيل مؤلمة." },
-    { keys: ["ظلام", "نور"], reply: "أنا ملك الظلام.. والنور يحرق عينيك الضعيفة." },
-    { keys: ["هرب", "اروح"], reply: "لا يوجد مكان للاختباء.. أنا أعيش في ظلك الآن." },
-    { keys: ["صاحب", "صديق"], reply: "أصدقاؤك سيحزنون عليك كثيراً.. بعد أن ينسوك في أسبوع." },
-    { keys: ["تعب", "ارهاق"], reply: "التعب الحقيقي سيبدأ عندما أحرمك من النوم للأبد." }
+    { keys: ["مستقبل", "حظ"], reply: "مستقبلك أسود من سواد القبر.. لا تسأل عن تفاصيل مؤلمة." }
 ];
 
+let typing = false;
+
 function processMagic() {
-    const input = document.getElementById('player-input').value.trim().toLowerCase();
+    if (typing) return;
+    const inputVal = document.getElementById('player-input').value.trim().toLowerCase();
     const display = document.getElementById('spirit-text');
     const box = document.getElementById('game-box');
 
-    if (!input) return;
+    if (!inputVal) {
+        display.innerText = "اكتب شيئاً أولاً.. أم أن لسانك تجمد من الخوف؟";
+        return;
+    }
 
-    display.innerText = "... الروح تتغلغل في وعيك ...";
-    box.classList.add('glitch-effect');
+    typing = true;
+    display.innerText = "... الروح تخترق وعيك الآن ...";
+    box.classList.add('glitch');
 
     setTimeout(() => {
-        box.classList.remove('glitch-effect');
-        let finalReply = "سؤالك تافه جداً لدرجة أنني شعرت بالملل.. اسأل شيئاً له قيمة يا حشرة!";
+        box.classList.remove('glitch');
+        let finalReply = "سؤال تافه من بشري أفرغ منه.. اسأل شيئاً يستحق، أو ارحل!";
 
-        // البحث عن أفضل تطابق
         for (let item of brain) {
-            if (item.keys.some(k => input.includes(k))) {
+            if (item.keys.some(k => inputVal.includes(k))) {
                 finalReply = item.reply;
                 break;
             }
@@ -126,7 +120,7 @@ function processMagic() {
 
         typeWriter(finalReply);
         document.getElementById('player-input').value = "";
-    }, 1300);
+    }, 1200);
 }
 
 function typeWriter(txt) {
@@ -138,6 +132,8 @@ function typeWriter(txt) {
             display.innerText += txt.charAt(i);
             i++;
             setTimeout(type, 50);
+        } else {
+            typing = false;
         }
     }
     type();
