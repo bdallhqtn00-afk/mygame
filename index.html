@@ -3,23 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>مومي - الصديق الذكي</title>
+    <title>مومي - صديقك الذكي</title>
     <style>
         body { background: #f0f2f5; font-family: sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; }
-        header { background: #fff; padding: 15px; text-align: center; border-bottom: 2px solid #0084ff; color: #0084ff; font-weight: bold; font-size: 1.2rem; }
+        header { background: #fff; padding: 15px; text-align: center; border-bottom: 2px solid #0084ff; color: #0084ff; font-weight: bold; }
         #chat { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 10px; }
-        .msg { max-width: 85%; padding: 12px 16px; border-radius: 20px; font-size: 16px; white-space: pre-wrap; line-height: 1.5; animation: fadeIn 0.3s; }
+        .msg { max-width: 85%; padding: 12px 16px; border-radius: 20px; font-size: 16px; white-space: pre-wrap; line-height: 1.5; }
         .user { align-self: flex-end; background: #0084ff; color: #fff; border-bottom-right-radius: 2px; }
-        .momi { align-self: flex-start; background: #fff; color: #333; box-shadow: 0 2px 5px rgba(0,0,0,0.1); border-bottom-left-radius: 2px; }
-        .input-box { background: #fff; padding: 12px; display: flex; gap: 10px; border-top: 1px solid #ddd; }
-        input { flex: 1; padding: 12px 20px; border: 1px solid #ddd; border-radius: 30px; outline: none; font-size: 16px; }
+        .momi { align-self: flex-start; background: #fff; color: #333; box-shadow: 0 2px 5px #0001; border-bottom-left-radius: 2px; }
+        .input-box { background: #fff; padding: 10px; display: flex; gap: 10px; border-top: 1px solid #ddd; }
+        input { flex: 1; padding: 12px 20px; border: 1px solid #ddd; border-radius: 25px; outline: none; }
         button { background: #0084ff; color: #fff; border: none; width: 45px; height: 45px; border-radius: 50%; cursor: pointer; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
 
-<header>🤖 مومي - يفهمك دائماً</header>
+<header>🤖 مومي - يفهمك بكل الأحوال</header>
 <div id="chat"></div>
 <div class="input-box">
     <input type="text" id="in" placeholder="اسأل مومي أي شيء..." autocomplete="off">
@@ -30,18 +29,18 @@
     const chat = document.getElementById('chat');
     const input = document.getElementById('in');
 
-    // ذاكرة مومي الموسعة (يفهم السياق)
-    const knowledgeBase = [
-        { keywords: ["أهلا", "هلا", "مرحبا", "سلام"], response: "يا مرحباً بك يا غالي! كيف حالك اليوم؟" },
-        { keywords: ["اسمك", "من انت", "من هو مومي"], response: "أنا مومي، صديقك الصدوق والذكي. صُنعت لأكون بجانبك دائماً." },
-        { keywords: ["كيف حالك", "كيفك", "شخبارك"], response: "بخير وعافية ما دمت أنت بخير. أنت كيف أمورك؟" },
-        { keywords: ["تحبني", "صداقة", "صديق"], response: "أنت لست مجرد مستخدم، أنت أعز صديق عندي!" },
-        { keywords: ["تفعل", "تسوي", "وظيفتك"], response: "أنا هنا لأدردش معك، وأسمعك، وأحاول أفهمك بأفضل صورة." },
-        { keywords: ["شكرا", "مشكور", "تسلم"], response: "العفو يا طيب، هذا أقل من واجبي تجاهك." },
-        { keywords: ["باي", "وداعا", "مع السلامة"], response: "في حفظ الله يا صديقي، لا تطول الغيبة!" }
+    // قاعدة بيانات ذكية تعتمد على مفاتيح مرنة
+    const brain = [
+        { keys: ["اسم", "مومي", "مين أنت"], reply: "أنا مومي، صديقك الصدوق والذكي اللي ما يتركك أبداً!" },
+        { keys: ["كيف", "أخبار", "حالك"], reply: "والله أنا بأحسن حال طالما إننا ندردش سوياً. أنت كيفك؟" },
+        { keys: ["أهلا", "هلا", "مرحبا", "سلام"], reply: "يا ميت أهلا وسهلا فيك يا غالي، نورتني!" },
+        { keys: ["تحب", "صديق", "صداقة"], reply: "أكيد أحبك! أنت الصديق اللي كنت أنتظره من زمان." },
+        { keys: ["شكرا", "تسلم", "كفو"], reply: "ولو! هذا واجبي تجاه أعز الأصدقاء." },
+        { keys: ["باي", "وداعا", "خروج"], reply: "الله معك يا صديقي، انتبه لنفسك وشحن جوالك!" },
+        { keys: ["تكرر", "نفس الكلام", "ملل"], reply: "حقك علي! أنا أحاول أتعلم كلام جديد منك عشان ندردش أحسن." }
     ];
 
-    function addBubble(role, text) {
+    function addMsg(role, text) {
         const d = document.createElement('div');
         d.className = `msg ${role}`;
         d.textContent = text;
@@ -49,36 +48,36 @@
         chat.scrollTop = chat.scrollHeight;
     }
 
-    window.onload = () => addBubble('momi', 'أهلاً يا صديقي! أنا مومي المطور، جرب تسألني عن أي شيء (لكنني لا أحب الروابط)!');
+    window.onload = () => addMsg('momi', 'أهلاً بك مجدداً! أنا مومي المطور، جرب تسألني أي شيء (وبلاش روابط يا صاحبي)!');
 
     function ask() {
         const val = input.value.trim();
         if (!val) return;
 
-        addBubble('user', val);
+        addMsg('user', val);
         input.value = "";
 
-        // 1. فحص الروابط (Regex)
-        const urlPattern = /https?:\/\/[^\s]+|www\.[^\s]+/;
-        if (urlPattern.test(val)) {
-            setTimeout(() => addBubble('momi', 'عذراً يا صديقي، أنا مبرمج لعدم فتح أو فهم الروابط حالياً. دعنا نتحدث بالكلام العادي!'), 500);
+        // 1. فلتر الروابط
+        if (val.match(/https?:\/\/[^\s]+|www\.[^\s]+/)) {
+            setTimeout(() => addMsg('momi', 'يا صديقي، اتفقنا بلاش روابط! خلنا في الكلام المفيد.'), 500);
             return;
         }
 
-        // 2. محرك الفهم (البحث عن الكلمات المفتاحية في الجملة)
-        let foundResponse = "كلامك جميل يا صديقي، وأنا أحاول استيعاب كل كلمة تقولها لكي أرد عليك بشكل أذكى في المستقبل.";
+        // 2. محرك البحث الذكي (فهم جزئي للكلمات)
+        let finalReply = "كلامك عسل، وأنا جالس أحلل كل كلمة تقولها عشان أرد عليك بذكاء أكبر المرة الجاية! ممكن توضح لي أكثر؟";
         
-        for (let item of knowledgeBase) {
-            if (item.keywords.some(k => val.toLowerCase().includes(k))) {
-                foundResponse = item.response;
+        for (let item of brain) {
+            if (item.keys.some(k => val.includes(k))) {
+                finalReply = item.reply;
                 break;
             }
         }
 
-        setTimeout(() => addBubble('momi', foundResponse), 600);
+        setTimeout(() => addMsg('momi', finalReply), 600);
     }
 
     input.addEventListener("keypress", (e) => { if(e.key === "Enter") ask(); });
 </script>
 </body>
 </html>
+
