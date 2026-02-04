@@ -8,11 +8,11 @@
         body { background: #f0f2f5; font-family: sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; }
         header { background: #fff; padding: 15px; text-align: center; border-bottom: 1px solid #ddd; color: #0084ff; font-weight: bold; }
         #chat { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 10px; }
-        .msg { max-width: 85%; padding: 12px 16px; border-radius: 20px; font-size: 16px; white-space: pre-wrap; line-height: 1.5; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
-        .user { align-self: flex-end; background: #0084ff; color: #fff; border-bottom-right-radius: 2px; }
-        .momi { align-self: flex-start; background: #fff; color: #333; border-bottom-left-radius: 2px; }
-        .input-box { background: #fff; padding: 10px; display: flex; gap: 10px; border-top: 1px solid #ddd; }
-        input { flex: 1; padding: 12px 18px; border: 1px solid #ddd; border-radius: 25px; outline: none; font-size: 16px; }
+        .msg { max-width: 80%; padding: 10px 15px; border-radius: 18px; font-size: 16px; white-space: pre-wrap; line-height: 1.5; }
+        .user { align-self: flex-end; background: #0084ff; color: #fff; }
+        .momi { align-self: flex-start; background: #fff; color: #333; box-shadow: 0 1px 2px #0002; }
+        .input-area { background: #fff; padding: 10px; display: flex; gap: 10px; border-top: 1px solid #ddd; }
+        input { flex: 1; padding: 10px 15px; border: 1px solid #ddd; border-radius: 25px; outline: none; }
         button { background: #0084ff; color: #fff; border: none; width: 45px; height: 45px; border-radius: 50%; cursor: pointer; }
     </style>
 </head>
@@ -20,64 +20,59 @@
 
 <header>🤖 مومي - صديقك الصدوق</header>
 <div id="chat"></div>
-<div class="input-box">
-    <input type="text" id="in" placeholder="تحدث مع مومي..." autocomplete="off">
-    <button onclick="ask()">➤</button>
+<div class="input-area">
+    <input type="text" id="user-input" placeholder="تحدث مع مومي..." autocomplete="off">
+    <button onclick="askMomi()">➤</button>
 </div>
 
 <script>
-    // مفتاحك الفعال من الصورة
+    // المفتاح الصحيح من صورتك
     const API_KEY = "AIzaSyD_3VdZfbt1BSj7vYnAcy6-cNRRWmajFTQ"; 
 
     const chatBox = document.getElementById('chat');
-    const input = document.getElementById('in');
+    const inputField = document.getElementById('user-input');
 
     function addBubble(role, text) {
-        const d = document.createElement('div');
-        d.className = `msg ${role}`;
-        d.textContent = text;
-        chatBox.appendChild(d);
+        const div = document.createElement('div');
+        div.className = `msg ${role}`;
+        div.textContent = text;
+        chatBox.appendChild(div);
         chatBox.scrollTop = chatBox.scrollHeight;
     }
 
-    // رسالة الترحيب
-    window.onload = () => addBubble('momi', 'أهلاً يا صديقي! أنا مومي، كيف حالك اليوم؟');
+    window.onload = () => addBubble('momi', 'أهلاً يا صديقي! أنا مومي، كيف أساعدك اليوم؟');
 
-    async function ask() {
-        const val = input.value.trim();
-        if (!val) return;
+    async function askMomi() {
+        const message = inputField.value.trim();
+        if (!message) return;
 
-        addBubble('user', val);
-        input.value = "";
+        addBubble('user', message);
+        inputField.value = "";
 
         try {
-            // استخدام رابط الـ API المباشر لـ Gemini 1.5 Flash
-            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`, {
+            // التعديل الجوهري: استخدام "gemini-1.5-flash-latest" بدلاً من الاسم القديم
+            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${API_KEY}`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    contents: [{ parts: [{ text: `أنت صديق ذكي اسمه مومي. رد بلطف وبالعامية اليمنية على: ${val}` }] }]
+                    contents: [{ parts: [{ text: `أنت صديق ذكي ومخلص اسمه مومي. رد بلطف وبالعامية اليمنية على: ${message}` }] }]
                 })
             });
 
             const data = await response.json();
 
-            // فحص البيانات بشكل أكثر دقة لتجنب الأخطاء السابقة
             if (data.candidates && data.candidates[0].content) {
                 const reply = data.candidates[0].content.parts[0].text;
                 addBubble('momi', reply);
             } else if (data.error) {
-                addBubble('momi', "خطأ من جوجل: " + data.error.message);
-            } else {
-                addBubble('momi', "يا صديقي، يبدو أن هناك مشكلة في صلاحية المفتاح. تأكد أنه 'Active' في Google AI Studio.");
+                addBubble('momi', "خطأ تقني: " + data.error.message);
             }
         } catch (e) {
-            addBubble('momi', "عذراً يا صديقي، تعذر الاتصال بالسيرفر. تأكد من الإنترنت.");
+            addBubble('momi', 'عذراً، حدث خطأ في الاتصال بالسيرفر.');
         }
     }
-
-    input.addEventListener("keypress", (e) => { if(e.key === "Enter") ask(); });
+    
+    inputField.addEventListener("keypress", (e) => { if(e.key === "Enter") askMomi(); });
 </script>
 </body>
 </html>
-
