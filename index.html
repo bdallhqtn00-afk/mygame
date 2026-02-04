@@ -2,103 +2,48 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>استجواب الأرواح</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>استجواب الأرواح - Shadow Pulse</title>
     <style>
-        body { background-color: #050505; color: #ff0000; font-family: 'Courier New', sans-serif; text-align: center; padding-top: 50px; overflow: hidden; height: 100vh; transition: background 0.1s; }
-        #game-container { position: relative; z-index: 10; }
-        input { background: transparent; border: 1px solid #ff0000; color: white; padding: 10px; font-size: 18px; width: 80%; margin-top: 20px; outline: none; }
-        button { background: #ff0000; color: black; border: none; padding: 10px 20px; font-size: 18px; cursor: pointer; margin-top: 10px; font-weight: bold; }
-        #question { font-size: 22px; min-height: 80px; text-shadow: 0 0 10px red; }
-        
-        /* تأثير تناثر الحروف */
-        .scatter { display: inline-block; animation: move 1s infinite alternate; }
-        @keyframes move { from { transform: translate(0,0); } to { transform: translate(5px, -10px) rotate(5deg); opacity: 0.7; } }
-
-        /* تأثير النملة */
-        #ant { position: fixed; width: 12px; height: 12px; background: #111; border-radius: 50%; display: none; z-index: 999; }
+        body { background-color: #0b0b0b; color: #00ff00; font-family: 'Courier New', monospace; text-align: center; padding: 20px; }
+        #game-container { border: 2px dashed #00ff00; padding: 20px; border-radius: 10px; max-width: 400px; margin: auto; background: #000; }
+        #spirit-msg { min-height: 120px; font-size: 20px; margin: 20px 0; color: #ff0055; font-weight: bold; }
+        .btn { background: #000; color: #00ff00; border: 1px solid #00ff00; padding: 15px; margin: 10px; border-radius: 5px; width: 90%; font-size: 16px; transition: 0.3s; }
+        .btn:active { background: #00ff00; color: #000; }
+        .insult { color: #ffff00; font-size: 14px; margin-top: 10px; display: block; }
     </style>
 </head>
 <body>
-    <div id="ant"></div>
     <div id="game-container">
-        <h1 id="question">هل تعتقد أنك وحيد في الغرفة؟</h1>
-        <input type="text" id="answerInput" placeholder="أجب.. نحن نراقبك">
-        <br>
-        <button onclick="nextQuestion()">إرسال الجواب</button>
-        <p id="counter" style="color: #444; margin-top: 50px;"></p>
+        <h1>استجواب الأرواح 💀</h1>
+        <div id="spirit-msg">لماذا أيقظتني يا أحمق؟ هل تريد أن ترى نهايتك أم تسأل أسئلة غبية كالعادة؟</div>
+        <div id="options">
+            <button class="btn" onclick="ask('من أنت؟')">من أنت؟</button>
+            <button class="btn" onclick="ask('هل سأنجح في حياتي؟')">هل سأنجح في حياتي؟</button>
+            <button class="btn" onclick="ask('أين ذهبت روحي؟')">أين ذهبت روحي؟</button>
+            <button class="btn" onclick="ask('توقف عن السخرية مني')">توقف عن السخرية مني!</button>
+        </div>
     </div>
 
     <script>
-        const questions = [
-            "ما هو أول شيء ستفعله إذا انطفأت أنوار غرفتك الآن؟",
-            "لماذا تشعر بأن أحداً يراقبك من خلفك بينما تقرأ هذا؟",
-            "هل تذكر ماذا فعلت في تلك الليلة المظلمة التي تحاول نسيانها؟",
-            "ما هو الاسم الذي تهمس به في كوابيسك؟",
-            "السؤال 5: هل شعرت بالهزة؟ نحن هنا معك..", // فخ الاهتزاز
-            "هل سمعت صوت الباب خلفك يتحرك قليلاً؟",
-            "لماذا يدك ترتجف وأنت تمسك هاتفك الآن؟",
-            "ماذا لو أخبرتك أنني أعرف لون ملابسك وموقعك حالياً؟",
-            "هل تثق حقاً في الجدران التي تحيط بك؟",
-            "السؤال 10: انظر للحروف.. إنها تفقد عقلها مثلك!", // فخ تناثر الحروف
-            "من هو الشخص الذي يقف في زاوية الغرفة المظلمة؟ لا تلتفت!",
-            "لماذا تتنفس بصعوبة أكبر مع كل سؤال؟",
-            "هل تظن أن هذه مجرد شاشة زجاجية تحميك منا؟",
-            "ما هو السر الذي تخفيه حتى عن نفسك؟",
-            "السؤال 15: هناك حشرة مقززة تمشي على شاشتك.. لا تلمسها!", // فخ النملة
-            "هل بدأت تشعر ببرودة غريبة في أطراف أصابعك؟",
-            "لماذا يزداد ضربان قلبك كلما اقتربت من النهاية؟",
-            "ماذا لو كان 'هو' يقرأ إجاباتك معك الآن؟",
-            "هل تسمع صوت الأنفاس الهادئة خلف أذانك؟",
-            "السؤال 20: استعد.. الواقع بدأ يتلاشى!", // فخ الوميض الأحمر
-            "هل تظن أنك ستنام بسلام بعد هذه الليلة؟",
-            "لماذا بدأت الغرفة تضيق من حولك؟",
-            "من سيتصل بالشرطة إذا اختفيت فجأة؟",
-            "هل تشعر بالندم لأنك فتحت هذا الرابط؟",
-            "السؤال الأخير: انظر خلفك الآن.. النهاية وصلت!"
-        ];
+        const responses = {
+            "من أنت؟": ["أنا كابوسك الأسوأ.. وأنت مجرد بشري يرتجف من تطبيق أندرويد!", "أنا الذي يراقبك من الكاميرا الآن.. وجهك مضحك وأنت خائف.", "أنا الروح التي ستسكن هاتفك لأن منزلك ممل جداً."],
+            "هل سأنجح في حياتي؟": ["بذكائك هذا؟ حتى الجن لا يستطيعون مساعدتك.", "نجاحك الوحيد هو أنك وصلت لهذا السؤال بدون أن تبكي.", "المستقبل مظلم.. تماماً مثل غرفتك الآن يا جبان."],
+            "أين ذهبت روحي؟": ["ضاعَت وهي تبحث عن عقل في رأسك.", "خلفك الآن.. تحاول الهرب من ملابسك غير المتناسقة.", "سأحتفظ بها أنا، أنت لا تستخدمها على أي حال."],
+            "توقف عن السخرية مني!": ["أوه، هل ستبكي؟ سأخبر الشياطين أنك حساس جداً.", "أنا لا أسخر، أنا أصف الواقع المرير لشكلك الآن.", "حسناً.. سأصمت، لكن انظر تحت قدميك الآن ببطء!"]
+        };
 
-        let currentIdx = 0;
-
-        function nextQuestion() {
-            let input = document.getElementById("answerInput");
-            if (input.value === "") { alert("لا تهرب من المصير! أجب!"); return; }
+        function ask(question) {
+            const msgDiv = document.getElementById('spirit-msg');
+            msgDiv.innerText = "... الروح تفكر في إهانة مناسبة ...";
             
-            currentIdx++;
-            document.getElementById("counter").innerText = `المرحلة ${currentIdx + 1} من 25`;
-
-            // فخ 5: الاهتزاز
-            if (currentIdx === 4) { window.navigator.vibrate([300, 100, 300, 100, 500]); }
-
-            // فخ 10: تناثر الحروف
-            if (currentIdx === 9) { document.getElementById("question").classList.add("scatter"); }
-
-            // فخ 15: النملة
-            if (currentIdx === 14) { 
-                let ant = document.getElementById("ant");
-                ant.style.display = "block";
-                let x = 0;
-                setInterval(() => {
-                    x += 3;
-                    ant.style.left = x + "px";
-                    ant.style.top = (Math.sin(x/30) * 100 + 300) + "px";
-                    if (x > window.innerWidth) x = 0;
-                }, 40);
-            }
-
-            // فخ 20: الوميض المرعب
-            if (currentIdx === 19) {
-                setInterval(() => {
-                    document.body.style.backgroundColor = document.body.style.backgroundColor === "black" ? "#200" : "black";
-                }, 150);
-            }
-
-            if (currentIdx < questions.length) {
-                document.getElementById("question").innerText = questions[currentIdx];
-                input.value = "";
-            } else {
-                document.body.innerHTML = "<h1 style='margin-top:200px; color:white;'>نحن الآن في منزلك.. لا تحاول الاختباء.</h1>";
-                window.navigator.vibrate(3000);
-            }
+            setTimeout(() => {
+                const r = responses[question];
+                msgDiv.innerText = r[Math.floor(Math.random() * r.length)];
+                
+                // إضافة اهتزاز للهاتف إذا كان مدعوماً
+                if (navigator.vibrate) navigator.vibrate(200);
+            }, 1200);
         }
     </script>
 </body>
