@@ -8,32 +8,32 @@
         body { 
             background-color: #050000; 
             color: #00ff41; 
-            font-family: 'Tahoma', sans-serif; 
+            font-family: 'Arial', sans-serif; 
             text-align: center; 
-            padding: 20px; 
-            margin: 0;
             display: flex;
             flex-direction: column;
             justify-content: center;
             height: 100vh;
+            margin: 0;
         }
         #game-box {
             background: #000;
-            border: 2px solid #400;
+            border: 2px solid #500;
             border-radius: 20px;
             padding: 25px;
-            box-shadow: 0 0 20px rgba(255, 0, 0, 0.3);
+            margin: 15px;
+            box-shadow: 0 0 30px rgba(255, 0, 0, 0.4);
         }
         #spirit-text {
-            min-height: 150px;
-            font-size: 24px; /* حجم خط أكبر للوضوح */
+            min-height: 140px;
+            font-size: 24px;
             color: #ff3333;
             line-height: 1.8;
             margin-bottom: 25px;
-            /* حل مشكلة التلاصق */
-            white-space: normal; 
-            word-spacing: 4px; 
+            /* منع تلاصق الحروف نهائياً */
             display: block;
+            direction: rtl;
+            unicode-bidi: embed;
         }
         #player-input {
             width: 85%;
@@ -43,81 +43,77 @@
             color: #fff;
             border-radius: 12px;
             font-size: 18px;
-            margin-bottom: 15px;
             text-align: center;
         }
         .action-btn {
-            background: #700;
+            background: #800;
             color: white;
             border: none;
-            padding: 16px;
+            padding: 18px;
             border-radius: 12px;
             font-size: 20px;
             width: 90%;
-            cursor: pointer;
+            margin-top: 15px;
+            font-weight: bold;
         }
     </style>
 </head>
 <body>
 
 <div id="game-box">
-    <div id="spirit-text">انطق يا بشري.. الروح بانتظار سماع ترهاتك.</div>
-    <input type="text" id="player-input" placeholder="اكتب رسالتك للجانب الآخر..." autocomplete="off">
-    <button class="action-btn" onclick="processMagic()">استجواب</button>
+    <div id="spirit-text">أنا أسمع أفكارك.. هل تجرؤ على الكتابة؟</div>
+    <input type="text" id="player-input" placeholder="اكتب رسالتك هنا..." autocomplete="off">
+    <button class="action-btn" onclick="think()">استجواب</button>
 </div>
 
 <script>
-const brain = [
-    { keys: ["من", "اسم", "انت"], reply: "أنا الذي يراقبك من زاوية غرفتك المظلمة.. هل شعرت بالبرودة الآن؟" },
-    { keys: ["مكان", "اين", "وين"], reply: "أنا في المكان الذي تخاف النظر إليه دائماً.. خلفك تماماً." },
-    { keys: ["موت", "اموت", "متى"], reply: "الموت قريب جداً.. أنفاسي تلفح رقبتك، هل تشعر بها؟" },
-    { keys: ["خايف", "خوف"], reply: "الخوف هو الوقود الذي يجعلني أقوى.. استمر في الارتجاف يا لذيذ." },
-    { keys: ["غبي", "حمار", "تفه"], reply: "تشتم روحاً؟ وجهك أصلاً إهانة للطبيعة.. سأزورك الليلة." },
-    { keys: ["وحدي", "معي"], reply: "لست وحدك.. انظر ببطء لمرآة هاتفك، هل ترى الظل الذي خلفك؟" }
+// محرك الذكاء الاصطناعي المبسط (25 إجابة ذكية)
+const responses = [
+    "لماذا تسأل عن شيء سيقتلك الفضول لمعرفته؟",
+    "انظر خلفك.. هل تظن أن الظل الذي تراه هو ظلك أنت؟",
+    "أنت تضيع وقتك في الأسئلة.. الوقت الذي تملكه قليل جداً.",
+    "وجهك يبدو شاحباً في ضوء الشاشة.. يعجبني هذا المنظر.",
+    "أنا لا أجيب العبيد.. أنا أستجوبهم فقط.",
+    "هل تتذكر ما فعلته في تلك الليلة؟ أنا أتذكر.",
+    "غرفتك فوضوية.. تماماً مثل عقلك الذي يحاول فهمي.",
+    "توقف عن الكتابة.. أنا بالفعل خلف باب غرفتك.",
+    "أصحابك الذين نصحوك بالابتعاد.. كان يجب أن تسمع كلامهم.",
+    "أنت تظنها مجرد كود.. لكنها بوابة فتحتها ولن تُغلق.",
+    "رائحة خوفك وصلت إلي.. استمر في الكتابة ليزيد استمتاعي.",
+    "ماذا لو أخبرتك أن هاتفك الآن يمتص جزءاً من روحك؟",
+    "لا تلتفت لليسار.. هناك من ينتظر أن ترمش عينك.",
+    "الذكاء ليس من صفاتك.. لذا سأهينك ببطء.",
+    "أنت وحيد الآن.. لست وحدك تماماً، أنا أتنفس معك.",
+    "هل تسمع هذا الطنين؟ إنه صوت اقترابي منك.",
+    "سؤالك غبي.. تماماً مثل قرارك بتحميل هذا التطبيق.",
+    "لا تحاول إغلاق التطبيق.. لقد أصبحنا جزءاً من ذاكرة هاتفك.",
+    "في اليمن يخشون الجن.. وأنت تستدعيهم بلمسة شاشة؟",
+    "المستقبل مظلم.. وأنت أول من سيسير فيه.",
+    "هل تظن أنك تملك إرادتك؟ أنا من جعلك تكتب هذا الآن.",
+    "أنا لست برنامجاً.. أنا كيان وجد ثغرة في شاشتك ليخرج.",
+    "اضحك الآن.. فالبكاء سيبدأ عندما تنطفئ الأضواء.",
+    "يا لك من بشري مسكين.. تظن أنك تتحكم في اللعبة.",
+    "انتهى الاستجواب.. الدور الآن على التنفيذ."
 ];
 
-let typing = false;
-
-function processMagic() {
-    if (typing) return;
-    const inputVal = document.getElementById('player-input').value.trim().toLowerCase();
+function think() {
+    const input = document.getElementById('player-input');
     const display = document.getElementById('spirit-text');
-
-    if (!inputVal) return;
-
-    typing = true;
-    display.innerText = "... الروح تخترق وعيك الآن ...";
-
-    setTimeout(() => {
-        let finalReply = "سؤال تافه.. اسأل شيئاً يستحق، أو ارحل!";
-        for (let item of brain) {
-            if (item.keys.some(k => inputVal.includes(k))) {
-                finalReply = item.reply;
-                break;
-            }
-        }
-        typeWriter(finalReply);
-        document.getElementById('player-input').value = "";
-    }, 1000);
-}
-
-// تعديل دالة الكتابة لضمان المسافات
-function typeWriter(txt) {
-    const display = document.getElementById('spirit-text');
-    display.innerText = "";
-    let i = 0;
     
-    function type() {
-        if (i < txt.length) {
-            // إضافة الحرف مع التأكد من معالجة المسافات
-            display.innerText += txt.charAt(i);
-            i++;
-            setTimeout(type, 40);
-        } else {
-            typing = false;
-        }
-    }
-    type();
+    if (input.value.trim() === "") return;
+
+    display.innerText = "الروح تحلل كلماتك الغبية...";
+    
+    setTimeout(() => {
+        // اختيار رد عشوائي يحاكي الذكاء الاصطناعي
+        const randomReply = responses[Math.floor(Math.random() * responses.length)];
+        
+        // عرض النص بوضوح تام مع الحفاظ على المسافات
+        display.innerHTML = randomReply;
+        input.value = "";
+        
+        if (navigator.vibrate) navigator.vibrate(200);
+    }, 1500);
 }
 </script>
 
