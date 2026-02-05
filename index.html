@@ -2,97 +2,164 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>مكتبة القصص - واتباد الخاص</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>مغامرة البطل - 30 مرحلة</title>
     <style>
-        :root { --main: #ff4500; --bg: #fdfdfd; }
-        body { font-family: sans-serif; background: var(--bg); margin: 0; padding-bottom: 50px; }
-        header { background: var(--main); color: white; padding: 15px; text-align: center; }
-        .search-area { padding: 10px; display: flex; gap: 5px; background: #fff; border-bottom: 1px solid #eee; }
-        input, textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; margin-bottom: 10px; }
-        .btn { background: var(--main); color: white; border: none; padding: 10px; border-radius: 5px; cursor: pointer; font-weight: bold; }
-        .container { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; padding: 10px; }
-        .book-card { background: white; border-radius: 8px; box-shadow: 0 2px 5px #0001; text-align: center; padding-bottom: 10px; }
-        .book-card img { width: 100%; height: 180px; object-fit: cover; border-radius: 8px 8px 0 0; }
-        /* صفحة القراءة */
-        #readPage { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 2000; overflow-y: auto; padding: 20px; box-sizing: border-box; }
-        #addModal { display: none; position: fixed; top: 0; background: rgba(0,0,0,0.8); width: 100%; height: 100%; z-index: 1000; justify-content: center; align-items: center; }
-        .modal-box { background: white; padding: 20px; width: 90%; max-width: 500px; border-radius: 10px; }
+        body { margin: 0; overflow: hidden; background: #5c94fa; font-family: 'Arial', sans-serif; touch-action: none; }
+        #gameCanvas { display: block; }
+        .ui { position: fixed; top: 15px; left: 15px; color: white; font-size: 22px; font-weight: bold; text-shadow: 2px 2px #000; pointer-events: none; }
+        .controls { position: fixed; bottom: 30px; width: 100%; display: flex; justify-content: space-between; padding: 0 30px; box-sizing: border-box; }
+        .btn { width: 70px; height: 70px; background: rgba(255,255,255,0.4); border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 35px; color: white; user-select: none; border: 2px solid #fff; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+        .btn:active { background: rgba(255,255,255,0.6); transform: scale(0.9); }
     </style>
 </head>
 <body>
 
-<header><h1>مكتبة حكاياتي</h1></header>
+<div class="ui">المرحلة: <span id="lvl">1</span> / 30</div>
+<canvas id="gameCanvas"></canvas>
 
-<div class="search-area">
-    <input type="text" id="searchIn" placeholder="ابحث عن قصة..." oninput="search()">
-    <button class="btn" onclick="showModal(true)">+ أنشئ كتاب</button>
-</div>
-
-<div class="container" id="library"></div>
-
-<div id="addModal">
-    <div class="modal-box">
-        <h3>نشر كتاب جديد</h3>
-        <input type="text" id="t" placeholder="عنوان الكتاب">
-        <input type="text" id="i" placeholder="رابط صورة الغلاف">
-        <textarea id="c" rows="8" placeholder="اكتب قصة كتابك هنا..."></textarea>
-        <button class="btn" style="width:100%" onclick="saveBook()">نشر الآن</button>
-        <button onclick="showModal(false)" style="width:100%; background:none; border:none; color:grey; margin-top:10px;">إلغاء</button>
+<div class="controls">
+    <div style="display:flex; gap:15px;">
+        <div class="btn" id="leftBtn">⬅</div>
+        <div class="btn" id="rightBtn">➡</div>
     </div>
-</div>
-
-<div id="readPage">
-    <button onclick="closeRead()" style="background:#eee; border:none; padding:10px; border-radius:5px; margin-bottom:20px;">⬅ العودة للمكتبة</button>
-    <h1 id="readTitle"></h1>
-    <hr>
-    <p id="readContent" style="font-size: 1.2rem; line-height: 1.8; white-space: pre-wrap;"></p>
+    <div class="btn" id="jumpBtn">⬆</div>
 </div>
 
 <script>
-    let books = JSON.parse(localStorage.getItem('wattpad_db')) || [];
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
 
-    function showModal(s) { document.getElementById('addModal').style.display = s ? 'flex' : 'none'; }
+// --- نظام الصوت البرمجي (بدون روابط) ---
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+function playSound(freq, type, duration, vol=0.1) {
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = type;
+    osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+    gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start();
+    gain.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + duration);
+    osc.stop(audioCtx.currentTime + duration);
+}
 
-    function saveBook() {
-        const title = document.getElementById('t').value;
-        const img = document.getElementById('i').value;
-        const content = document.getElementById('c').value;
+const jumpSnd = () => { playSound(400, 'square', 0.15); playSound(600, 'square', 0.2); };
+const winSnd = () => { playSound(523, 'triangle', 0.1); setTimeout(()=>playSound(659, 'triangle', 0.1), 100); setTimeout(()=>playSound(783, 'triangle', 0.3), 200); };
 
-        if(title && content) {
-            books.push({title, img, content});
-            localStorage.setItem('wattpad_db', JSON.stringify(books));
-            render();
-            showModal(false);
-            document.getElementById('t').value = ''; document.getElementById('c').value = '';
+// --- متغيرات اللعبة ---
+let currentLevel = parseInt(localStorage.getItem('hero_game_lvl')) || 1;
+document.getElementById('lvl').innerText = currentLevel;
+
+const player = {
+    x: 50, y: 0, w: 35, h: 35,
+    color: '#E74C3C', dy: 0, speed: 6,
+    jumpPower: 14, grounded: false, moveLeft: false, moveRight: false
+};
+
+const gravity = 0.7;
+let platforms = [];
+let goal = { x: 0, y: 0, w: 45, h: 70 };
+
+function createLevel(lvl) {
+    platforms = [
+        { x: 0, y: canvas.height - 40, w: canvas.width * 2, h: 40, c: '#27AE60' } // الأرض
+    ];
+    
+    // توزيع منصات عشوائي ذكي بناءً على المرحلة
+    for(let i=1; i<6; i++) {
+        platforms.push({
+            x: i * 250, 
+            y: canvas.height - (100 + Math.random() * 200),
+            w: 120, h: 20, c: '#8E44AD'
+        });
+    }
+    
+    goal.x = 1600 + (lvl * 100);
+    goal.y = canvas.height - 110;
+}
+
+function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // الخلفية (تتحرك مع اللاعب)
+    ctx.save();
+    ctx.translate(-player.x + 50, 0);
+
+    // رسم الهدف (العلم الذهبي)
+    ctx.fillStyle = '#F1C40F';
+    ctx.fillRect(goal.x, goal.y, goal.w, goal.h);
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(goal.x, goal.y, 10, goal.h);
+
+    // رسم المنصات
+    platforms.forEach(p => {
+        ctx.fillStyle = p.c;
+        ctx.fillRect(p.x, p.y, p.w, p.h);
+        ctx.strokeStyle = 'rgba(0,0,0,0.1)';
+        ctx.strokeRect(p.x, p.y, p.w, p.h);
+    });
+
+    // رسم اللاعب
+    ctx.fillStyle = player.color;
+    ctx.fillRect(player.x, player.y, player.w, player.h);
+    ctx.strokeStyle = '#fff';
+    ctx.strokeRect(player.x, player.y, player.w, player.h);
+
+    ctx.restore();
+    update();
+    requestAnimationFrame(draw);
+}
+
+function update() {
+    if (player.moveLeft) player.x -= player.speed;
+    if (player.moveRight) player.x += player.speed;
+
+    player.y += player.dy;
+    if (player.y + player.h < canvas.height) {
+        player.dy += gravity;
+        player.grounded = false;
+    } else {
+        player.dy = 0; player.y = canvas.height - player.h - 40; player.grounded = true;
+    }
+
+    platforms.forEach(p => {
+        if (player.x < p.x + p.w && player.x + player.w > p.x &&
+            player.y + player.h > p.y && player.y + player.h < p.y + p.h + player.dy) {
+            player.dy = 0; player.y = p.y - player.h; player.grounded = true;
         }
+    });
+
+    if (player.x + player.w > goal.x && player.y + player.h > goal.y) {
+        winSound();
+        currentLevel++;
+        if(currentLevel > 30) { alert("ختمت اللعبة!"); currentLevel = 1; }
+        localStorage.setItem('hero_game_lvl', currentLevel);
+        document.getElementById('lvl').innerText = currentLevel;
+        player.x = 50; createLevel(currentLevel);
     }
+}
 
-    function render(data = books) {
-        document.getElementById('library').innerHTML = data.map((b, i) => `
-            <div class="book-card">
-                <img src="${b.img || 'https://via.placeholder.com/150x180?text=Cover'}">
-                <h4>${b.title}</h4>
-                <button class="btn" onclick="openRead(${books.indexOf(b)})">قراءة القصة</button>
-            </div>
-        `).join('');
-    }
+// التحكم
+const startAudio = () => { if (audioCtx.state === 'suspended') audioCtx.resume(); };
 
-    function openRead(index) {
-        const b = books[index];
-        document.getElementById('readTitle').innerText = b.title;
-        document.getElementById('readContent').innerText = b.content;
-        document.getElementById('readPage').style.display = 'block';
-    }
+document.getElementById('leftBtn').ontouchstart = (e) => { e.preventDefault(); player.moveLeft = true; startAudio(); };
+document.getElementById('leftBtn').ontouchend = () => player.moveLeft = false;
 
-    function closeRead() { document.getElementById('readPage').style.display = 'none'; }
+document.getElementById('rightBtn').ontouchstart = (e) => { e.preventDefault(); player.moveRight = true; startAudio(); };
+document.getElementById('rightBtn').ontouchend = () => player.moveRight = false;
 
-    function search() {
-        const q = document.getElementById('searchIn').value.toLowerCase();
-        render(books.filter(b => b.title.toLowerCase().includes(q)));
-    }
+document.getElementById('jumpBtn').ontouchstart = (e) => { 
+    e.preventDefault();
+    if(player.grounded) { player.dy = -player.jumpPower; jumpSnd(); }
+    startAudio();
+};
 
-    render();
+createLevel(currentLevel);
+draw();
 </script>
 </body>
 </html>
