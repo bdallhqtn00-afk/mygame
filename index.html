@@ -3,74 +3,120 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لعبة نقرات الذهب 💰</title>
+    <title>لعبة نقرات الذهب - نظام التطويرات 💰</title>
     <style>
         body {
             background: radial-gradient(circle, #2c3e50, #000000);
-            color: white;
-            font-family: 'Arial', sans-serif;
-            text-align: center;
-            height: 100vh;
-            margin: 0;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            user-select: none; /* لمنع تحديد النص أثناء النقر السريع */
+            color: white; font-family: 'Arial', sans-serif;
+            text-align: center; height: 100vh; margin: 0;
+            display: flex; flex-direction: column; justify-content: center; align-items: center; user-select: none;
         }
-        #score-container { font-size: 3rem; margin-bottom: 20px; font-weight: bold; color: #f1c40f; }
+        #score-container { font-size: 2.5rem; margin-bottom: 10px; font-weight: bold; color: #f1c40f; }
+        #power-info { font-size: 1.2rem; color: #bdc3c7; margin-bottom: 20px; }
+        
         #coin {
-            width: 200px;
-            height: 200px;
+            width: 180px; height: 180px;
             background: linear-gradient(45deg, #f1c40f, #f39c12);
-            border-radius: 50%;
-            box-shadow: 0 0 50px rgba(241, 196, 15, 0.5);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 5rem;
-            cursor: pointer;
-            transition: transform 0.1s;
-            border: 8px solid #d4ac0d;
+            border-radius: 50%; box-shadow: 0 0 40px rgba(241, 196, 15, 0.4);
+            display: flex; justify-content: center; align-items: center;
+            font-size: 4rem; cursor: pointer; transition: transform 0.1s; border: 6px solid #d4ac0d;
         }
         #coin:active { transform: scale(0.9); }
+
+        /* زر قائمة التطويرات */
+        #shop-btn {
+            margin-top: 30px; background: #27ae60; color: white;
+            padding: 10px 25px; border: none; border-radius: 20px;
+            font-size: 1.2rem; cursor: pointer; font-weight: bold;
+        }
+
+        /* نافذة المتجر المنبثقة */
+        #shop-menu {
+            display: none; position: fixed; top: 50%; left: 50%;
+            transform: translate(-50%, -50%); background: #34495e;
+            padding: 20px; border-radius: 15px; border: 2px solid #f1c40f;
+            width: 280px; z-index: 100;
+        }
+        .upgrade-item {
+            background: #2c3e50; margin: 10px 0; padding: 10px;
+            border-radius: 10px; display: flex; justify-content: space-between; align-items: center;
+        }
+        .buy-btn { background: #f1c40f; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        .buy-btn:disabled { background: #7f8c8d; cursor: not-allowed; }
+        #close-shop { margin-top: 15px; color: #e74c3c; cursor: pointer; display: block; }
+
         .plus-one {
-            position: absolute;
-            color: #f1c40+f;
-            font-size: 2rem;
-            animation: moveUp 0.5s ease-out;
-            pointer-events: none;
+            position: absolute; color: #f1c40f; font-size: 1.5rem;
+            animation: moveUp 0.5s ease-out; pointer-events: none;
         }
-        @keyframes moveUp {
-            0% { transform: translateY(0); opacity: 1; }
-            100% { transform: translateY(-100px); opacity: 0; }
-        }
+        @keyframes moveUp { 0% { transform: translateY(0); opacity: 1; } 100% { transform: translateY(-80px); opacity: 0; } }
     </style>
 </head>
 <body>
 
     <div id="score-container">💰 <span id="score">0</span></div>
+    <div id="power-info">قوة النقرة الحالية: <span id="click-power">1</span></div>
     
     <div id="coin" onclick="clickCoin(event)">🪙</div>
 
+    <button id="shop-btn" onclick="toggleShop()">🛒 قائمة التطويرات</button>
+
+    <div id="shop-menu">
+        <h3>تطوير النقرات</h3>
+        <div class="upgrade-item">
+            <span>مطرقة خشبية<br><small>تكلفة: 50</small></span>
+            <button class="buy-btn" id="btn-up1" onclick="buyUpgrade(50, 2)">شراء</button>
+        </div>
+        <div class="upgrade-item">
+            <span>مطرقة حديدية<br><small>تكلفة: 200</small></span>
+            <button class="buy-btn" id="btn-up2" onclick="buyUpgrade(200, 5)">شراء</button>
+        </div>
+        <span id="close-shop" onclick="toggleShop()">إغلاق القائمة</span>
+    </div>
+
     <script>
-        let count = 0;
-        const scoreElement = document.getElementById('score');
+        let score = 0;
+        let clickPower = 1;
 
         function clickCoin(event) {
-            count++;
-            scoreElement.innerText = count;
+            score += clickPower;
+            document.getElementById('score').innerText = score;
 
-            // تأثير ظهور رقم +1 عند مكان النقرة
+            // تأثير ظهور القيمة المضافة
             const plus = document.createElement('div');
-            plus.innerText = '+1';
+            plus.innerText = '+' + clickPower;
             plus.className = 'plus-one';
             plus.style.left = event.pageX + 'px';
             plus.style.top = event.pageY + 'px';
             document.body.appendChild(plus);
-
-            // حذف التاثير بعد انتهاء الانيميشن
             setTimeout(() => { plus.remove(); }, 500);
+            
+            checkButtons();
+        }
+
+        function toggleShop() {
+            const shop = document.getElementById('shop-menu');
+            shop.style.display = (shop.style.display === 'block') ? 'none' : 'block';
+            checkButtons();
+        }
+
+        function buyUpgrade(cost, newPower) {
+            if (score >= cost) {
+                score -= cost;
+                clickPower = newPower; // تدبيل أو زيادة قوة النقرة
+                document.getElementById('score').innerText = score;
+                document.getElementById('click-power').innerText = clickPower;
+                alert("تهانينا! زادت قوة نقرتك إلى " + clickPower);
+                toggleShop();
+            } else {
+                alert("رصيدك غير كافٍ!");
+            }
+        }
+
+        // تعطيل الأزرار إذا كانت النقاط غير كافية
+        function checkButtons() {
+            document.getElementById('btn-up1').disabled = (score < 50);
+            document.getElementById('btn-up2').disabled = (score < 200);
         }
     </script>
 </body>
