@@ -3,120 +3,149 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لعبة نقرات الذهب - نظام التطويرات 💰</title>
+    <title>لعبة نقرات الذهب - نظام المستويات 💰</title>
     <style>
         body {
-            background: radial-gradient(circle, #2c3e50, #000000);
+            background: radial-gradient(circle, #1a1a2e, #16213e);
             color: white; font-family: 'Arial', sans-serif;
             text-align: center; height: 100vh; margin: 0;
             display: flex; flex-direction: column; justify-content: center; align-items: center; user-select: none;
         }
-        #score-container { font-size: 2.5rem; margin-bottom: 10px; font-weight: bold; color: #f1c40f; }
-        #power-info { font-size: 1.2rem; color: #bdc3c7; margin-bottom: 20px; }
+        #score-container { font-size: 3rem; margin-bottom: 5px; color: #f1c40f; text-shadow: 0 0 20px rgba(241,196,15,0.5); }
+        #power-info { font-size: 1.1rem; color: #bdc3c7; margin-bottom: 25px; }
         
         #coin {
-            width: 180px; height: 180px;
+            width: 200px; height: 200px;
             background: linear-gradient(45deg, #f1c40f, #f39c12);
-            border-radius: 50%; box-shadow: 0 0 40px rgba(241, 196, 15, 0.4);
+            border-radius: 50%; box-shadow: 0 0 50px rgba(241, 196, 15, 0.4);
             display: flex; justify-content: center; align-items: center;
-            font-size: 4rem; cursor: pointer; transition: transform 0.1s; border: 6px solid #d4ac0d;
+            font-size: 5rem; cursor: pointer; transition: transform 0.05s; border: 8px solid #d4ac0d;
         }
-        #coin:active { transform: scale(0.9); }
+        #coin:active { transform: scale(0.92); }
 
-        /* زر قائمة التطويرات */
         #shop-btn {
-            margin-top: 30px; background: #27ae60; color: white;
-            padding: 10px 25px; border: none; border-radius: 20px;
-            font-size: 1.2rem; cursor: pointer; font-weight: bold;
+            margin-top: 40px; background: #27ae60; color: white;
+            padding: 12px 30px; border: none; border-radius: 25px;
+            font-size: 1.3rem; cursor: pointer; font-weight: bold; box-shadow: 0 4px 15px rgba(0,0,0,0.3);
         }
 
-        /* نافذة المتجر المنبثقة */
         #shop-menu {
             display: none; position: fixed; top: 50%; left: 50%;
-            transform: translate(-50%, -50%); background: #34495e;
-            padding: 20px; border-radius: 15px; border: 2px solid #f1c40f;
-            width: 280px; z-index: 100;
+            transform: translate(-50%, -50%); background: #0f3460;
+            padding: 20px; border-radius: 20px; border: 2px solid #f1c40f;
+            width: 320px; z-index: 100; box-shadow: 0 0 100px rgba(0,0,0,0.8);
         }
         .upgrade-item {
-            background: #2c3e50; margin: 10px 0; padding: 10px;
-            border-radius: 10px; display: flex; justify-content: space-between; align-items: center;
+            background: #16213e; margin: 12px 0; padding: 15px;
+            border-radius: 12px; display: flex; justify-content: space-between; align-items: center;
+            border: 1px solid #1a1a2e;
         }
-        .buy-btn { background: #f1c40f; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-weight: bold; }
-        .buy-btn:disabled { background: #7f8c8d; cursor: not-allowed; }
-        #close-shop { margin-top: 15px; color: #e74c3c; cursor: pointer; display: block; }
+        .upgrade-info { text-align: right; font-size: 0.9rem; }
+        .upgrade-info b { color: #f1c40f; font-size: 1.1rem; }
+        .buy-btn { background: #e67e22; border: none; padding: 8px 12px; border-radius: 8px; color: white; cursor: pointer; font-weight: bold; }
+        .buy-btn:disabled { background: #555; opacity: 0.6; cursor: not-allowed; }
+        #close-shop { margin-top: 20px; color: #ff4757; cursor: pointer; display: block; font-weight: bold; }
 
         .plus-one {
-            position: absolute; color: #f1c40f; font-size: 1.5rem;
-            animation: moveUp 0.5s ease-out; pointer-events: none;
+            position: absolute; color: #f1c40f; font-size: 2rem; font-weight: bold;
+            animation: moveUp 0.6s ease-out; pointer-events: none; text-shadow: 0 2px 4px rgba(0,0,0,0.5);
         }
-        @keyframes moveUp { 0% { transform: translateY(0); opacity: 1; } 100% { transform: translateY(-80px); opacity: 0; } }
+        @keyframes moveUp { 0% { transform: translateY(0); opacity: 1; } 100% { transform: translateY(-120px); opacity: 0; } }
     </style>
 </head>
 <body>
 
     <div id="score-container">💰 <span id="score">0</span></div>
-    <div id="power-info">قوة النقرة الحالية: <span id="click-power">1</span></div>
+    <div id="power-info">القوة: <span id="click-power">1</span> لكل نقرة</div>
     
     <div id="coin" onclick="clickCoin(event)">🪙</div>
 
-    <button id="shop-btn" onclick="toggleShop()">🛒 قائمة التطويرات</button>
+    <button id="shop-btn" onclick="toggleShop()">🛒 المتجر والتطويرات</button>
 
     <div id="shop-menu">
-        <h3>تطوير النقرات</h3>
+        <h2 style="margin-top:0; color:#f1c40f;">متجر الأدوات</h2>
+        
         <div class="upgrade-item">
-            <span>مطرقة خشبية<br><small>تكلفة: 50</small></span>
-            <button class="buy-btn" id="btn-up1" onclick="buyUpgrade(50, 2)">شراء</button>
+            <div class="upgrade-info">
+                <b id="name1">مطرقة خشبية</b> (مستوى <span id="lvl1">0</span>)<br>
+                السعر: <span id="cost1">20</span> 💰
+            </div>
+            <button class="buy-btn" id="btn1" onclick="buyUpgrade(1)">شراء</button>
         </div>
+
         <div class="upgrade-item">
-            <span>مطرقة حديدية<br><small>تكلفة: 200</small></span>
-            <button class="buy-btn" id="btn-up2" onclick="buyUpgrade(200, 5)">شراء</button>
+            <div class="upgrade-info">
+                <b id="name2">خنجر يمني</b> (مستوى <span id="lvl2">0</span>)<br>
+                السعر: <span id="cost2">150</span> 💰
+            </div>
+            <button class="buy-btn" id="btn2" onclick="buyUpgrade(2)">شراء</button>
         </div>
-        <span id="close-shop" onclick="toggleShop()">إغلاق القائمة</span>
+
+        <div class="upgrade-item">
+            <div class="upgrade-info">
+                <b id="name3">سيف الفرسان</b> (مستوى <span id="lvl3">0</span>)<br>
+                السعر: <span id="cost3">1000</span> 💰
+            </div>
+            <button class="buy-btn" id="btn3" onclick="buyUpgrade(3)">شراء</button>
+        </div>
+
+        <span id="close-shop" onclick="toggleShop()">إغلاق المتجر</span>
     </div>
 
     <script>
         let score = 0;
         let clickPower = 1;
 
+        // بيانات التطويرات: التكلفة الأولية، زيادة القوة، المستوى
+        let upgrades = {
+            1: { cost: 20, powerGain: 1, level: 0 },
+            2: { cost: 150, powerGain: 5, level: 0 },
+            3: { cost: 1000, powerGain: 25, level: 0 }
+        };
+
         function clickCoin(event) {
             score += clickPower;
-            document.getElementById('score').innerText = score;
+            updateUI();
 
-            // تأثير ظهور القيمة المضافة
             const plus = document.createElement('div');
             plus.innerText = '+' + clickPower;
             plus.className = 'plus-one';
             plus.style.left = event.pageX + 'px';
             plus.style.top = event.pageY + 'px';
             document.body.appendChild(plus);
-            setTimeout(() => { plus.remove(); }, 500);
-            
-            checkButtons();
+            setTimeout(() => plus.remove(), 600);
         }
 
         function toggleShop() {
             const shop = document.getElementById('shop-menu');
             shop.style.display = (shop.style.display === 'block') ? 'none' : 'block';
-            checkButtons();
+            updateUI();
         }
 
-        function buyUpgrade(cost, newPower) {
-            if (score >= cost) {
-                score -= cost;
-                clickPower = newPower; // تدبيل أو زيادة قوة النقرة
-                document.getElementById('score').innerText = score;
-                document.getElementById('click-power').innerText = clickPower;
-                alert("تهانينا! زادت قوة نقرتك إلى " + clickPower);
-                toggleShop();
-            } else {
-                alert("رصيدك غير كافٍ!");
+        function buyUpgrade(id) {
+            let up = upgrades[id];
+            if (score >= up.cost) {
+                score -= up.cost;
+                up.level++;
+                clickPower += up.powerGain;
+                // زيادة السعر بنسبة 50% في كل مرة تشتري فيها نفس التطويرة
+                up.cost = Math.floor(up.cost * 1.5); 
+                
+                updateUI();
             }
         }
 
-        // تعطيل الأزرار إذا كانت النقاط غير كافية
-        function checkButtons() {
-            document.getElementById('btn-up1').disabled = (score < 50);
-            document.getElementById('btn-up2').disabled = (score < 200);
+        function updateUI() {
+            document.getElementById('score').innerText = Math.floor(score);
+            document.getElementById('click-power').innerText = clickPower;
+            
+            // تحديث نصوص المتجر وأزراره
+            for (let id in upgrades) {
+                let up = upgrades[id];
+                document.getElementById('cost' + id).innerText = up.cost;
+                document.getElementById('lvl' + id).innerText = up.level;
+                document.getElementById('btn' + id).disabled = (score < up.cost);
+            }
         }
     </script>
 </body>
