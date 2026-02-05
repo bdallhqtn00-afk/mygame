@@ -3,21 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, orientation=landscape">
-    <title>ماريو الاحترافية</title>
+    <title>ماريو: مغامرة الـ 30 مرحلة</title>
     <style>
-        body { margin: 0; overflow: hidden; background: #5c94fa; touch-action: none; }
-        canvas { display: block; image-rendering: pixelated; }
-        .controls { position: fixed; bottom: 15px; width: 100%; display: flex; justify-content: space-between; padding: 0 30px; box-sizing: border-box; }
-        .btn { width: 70px; height: 70px; background: rgba(0,0,0,0.4); border: 3px solid #fff; border-radius: 50%; display: flex; justify-content: center; align-items: center; color: white; font-size: 30px; pointer-events: auto; }
-        .a-btn { background: #ff3131; width: 80px; height: 80px; }
+        body { margin: 0; overflow: hidden; background: #5c94fa; touch-action: none; font-family: sans-serif; }
+        canvas { display: block; }
+        .ui { position: fixed; top: 10px; left: 10px; color: white; font-size: 18px; font-weight: bold; text-shadow: 2px 2px #000; pointer-events: none; }
+        
+        /* تعديل الأزرار لتكون أصغر (Mini Controls) */
+        .controls { position: fixed; bottom: 15px; width: 100%; display: flex; justify-content: space-between; padding: 0 25px; box-sizing: border-box; }
+        .btn { 
+            width: 55px; height: 55px; /* تم تصغير الحجم من 70 إلى 55 */
+            background: rgba(0,0,0,0.35); 
+            border: 2px solid rgba(255,255,255,0.6); 
+            border-radius: 50%; 
+            display: flex; justify-content: center; align-items: center; 
+            color: white; font-size: 22px; 
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .a-btn { 
+            background: rgba(255, 49, 49, 0.5); 
+            border-color: #fff; 
+            width: 65px; height: 65px; /* زر القفز أكبر قليلاً من الحركة لكنه أصغر من السابق */
+            font-size: 24px;
+        }
+        .btn:active { background: rgba(255,255,255,0.5); transform: scale(0.9); }
     </style>
 </head>
 <body>
 
+<div class="ui">المرحلة: <span id="lvl">1</span> / 30</div>
 <canvas id="gameCanvas"></canvas>
 
 <div class="controls">
-    <div style="display:flex; gap:15px;">
+    <div style="display:flex; gap:12px;">
         <div class="btn" id="lBtn">◀</div>
         <div class="btn" id="rBtn">▶</div>
     </div>
@@ -30,115 +49,95 @@ const ctx = canvas.getContext('2d');
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
+let currentLvl = parseInt(localStorage.getItem('mario_lvl')) || 1;
 let player = { x: 50, y: 100, w: 32, h: 40, velX: 0, velY: 0, grounded: false, dead: false };
-let enemies = [];
-let platforms = [];
-let cameraX = 0;
+let platforms = [], enemies = [], cameraX = 0, goalX = 0;
 
-function initLevel() {
+function initLevel(lvl) {
+    document.getElementById('lvl').innerText = lvl;
     player.x = 50; player.y = 100; player.dead = false;
-    // منصات (طوب)
-    platforms = [
-        { x: 0, y: canvas.height - 40, w: 5000, h: 40, type: 'ground' },
-        { x: 300, y: canvas.height - 150, w: 120, h: 40, type: 'brick' },
-        { x: 500, y: canvas.height - 250, w: 80, h: 40, type: 'brick' }
-    ];
-    // وحوش (الفطر)
-    enemies = [
-        { x: 600, y: canvas.height - 80, w: 35, h: 35, speed: -2 },
-        { x: 1200, y: canvas.height - 80, w: 35, h: 35, speed: -2.5 }
-    ];
+    cameraX = 0;
+    
+    const worldLength = 2000 + (lvl * 500);
+    platforms = [{ x: 0, y: canvas.height - 40, w: worldLength, h: 40, type: 'ground' }];
+    
+    for(let i=1; i < 5 + lvl; i++) {
+        platforms.push({ x: i * 300, y: canvas.height - 150 - (Math.random() * 150), w: 100, h: 30, type: 'brick' });
+        enemies.push({ x: i * 450, y: canvas.height - 75, w: 35, h: 35, speed: -2 - (lvl * 0.2) });
+    }
+    
+    goalX = worldLength - 100;
 }
 
 function update() {
     if (player.dead) return;
-
     if (keys.r) player.velX = 5; else if (keys.l) player.velX = -5; else player.velX *= 0.8;
-    
-    player.velY += 0.8; // جاذبية
-    player.x += player.velX;
-    player.y += player.velY;
+    player.velY += 0.8; player.x += player.velX; player.y += player.velY;
 
     player.grounded = false;
-    
-    // نظام التصادم الذكي (من كل الجهات)
     platforms.forEach(p => {
-        if (player.x < p.x + p.w && player.x + player.w > p.x &&
-            player.y < p.y + p.h && player.y + player.h > p.y) {
-            
-            let overlapX = Math.min(player.x + player.w - p.x, p.x + p.w - player.x);
-            let overlapY = Math.min(player.y + player.h - p.y, p.y + p.h - player.y);
-
-            if (overlapX > overlapY) {
-                if (player.velY > 0) { // اصطدام من الأعلى (وقوف)
-                    player.velY = 0; player.y = p.y - player.h; player.grounded = true;
-                } else { // اصطدام من الأسفل (نطح)
-                    player.velY = 2; player.y = p.y + p.h;
-                }
-            } else { // اصطدام جانبي
-                player.x = (player.velX > 0) ? p.x - player.w : p.x + p.w;
-                player.velX = 0;
+        if (player.x < p.x + p.w && player.x + player.w > p.x && player.y + player.h > p.y && player.y < p.y + p.h) {
+            if (player.velY > 0 && player.y + player.h < p.y + 20) {
+                player.velY = 0; player.y = p.y - player.h; player.grounded = true;
+            } else if (player.velY < 0 && player.y > p.y + p.h - 20) {
+                player.velY = 2; player.y = p.y + p.h;
             }
         }
     });
 
-    // تحريك الوحوش وقتل اللاعب
     enemies.forEach(en => {
         en.x += en.speed;
-        if (en.x < 0 || en.x > 3000) en.speed *= -1; // ارتداد
-
-        if (player.x < en.x + en.w && player.x + player.w > en.x &&
-            player.y < en.y + en.h && player.y + player.h > en.y) {
-            if (player.velY > 0 && player.y + player.h < en.y + 20) { // قفز فوق الوحش
-                en.dead = true; player.velY = -10;
-            } else { // الوحش لمس اللاعب
-                player.dead = true; 
-                setTimeout(() => { initLevel(); }, 1000);
-            }
+        if (en.x < 0 || en.x > goalX) en.speed *= -1;
+        if (player.x < en.x + en.w && player.x + player.w > en.x && player.y + player.h > en.y && player.y < en.y + en.h) {
+            if (player.velY > 0) { en.dead = true; player.velY = -10; }
+            else { player.dead = true; setTimeout(() => initLevel(currentLvl), 1000); }
         }
     });
     enemies = enemies.filter(en => !en.dead);
 
-    if (player.x > canvas.width/2) cameraX = player.x - canvas.width/2;
+    if (player.x > goalX) {
+        if (currentLvl < 30) {
+            currentLvl++;
+            localStorage.setItem('mario_lvl', currentLvl);
+            alert("مبروك! إلى المرحلة " + currentLvl);
+            initLevel(currentLvl);
+        } else {
+            alert("أنت بطل حقيقي! ختمت اللعبة!");
+            currentLvl = 1; initLevel(1);
+        }
+    }
+
+    if (player.x > canvas.width / 2) cameraX = player.x - canvas.width / 2;
 }
 
 function draw() {
-    ctx.clearRect(0,0, canvas.width, canvas.height);
-    ctx.save();
-    ctx.translate(-cameraX, 0);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.save(); ctx.translate(-cameraX, 0);
 
-    // رسم الأرض والطوب
+    ctx.fillStyle = "gold"; ctx.fillRect(goalX, canvas.height - 240, 50, 200);
+    ctx.fillStyle = "white"; ctx.fillRect(goalX, canvas.height - 240, 5, 200);
+
     platforms.forEach(p => {
-        ctx.fillStyle = (p.type === 'ground') ? "#8B4513" : "#ff5a5a";
+        ctx.fillStyle = p.type === 'ground' ? "#8B4513" : "#ff5a5a";
         ctx.fillRect(p.x, p.y, p.w, p.h);
-        ctx.strokeRect(p.x, p.y, p.w, p.h);
     });
 
-    // رسم الوحوش (دوائر بنية)
-    enemies.forEach(en => {
-        ctx.fillStyle = "#5D4037";
-        ctx.beginPath(); ctx.arc(en.x+en.w/2, en.y+en.h/2, en.w/2, 0, Math.PI*2); ctx.fill();
-    });
+    enemies.forEach(en => { ctx.fillStyle = "black"; ctx.fillRect(en.x, en.y, en.w, en.h); });
 
-    // رسم ماريو (مربع مع قبعة)
     ctx.fillStyle = player.dead ? "gray" : "red";
     ctx.fillRect(player.x, player.y, player.w, player.h);
-    ctx.fillStyle = "blue"; ctx.fillRect(player.x, player.y+20, player.w, 10); // لباس
 
-    ctx.restore();
-    update();
-    requestAnimationFrame(draw);
+    ctx.restore(); update(); requestAnimationFrame(draw);
 }
 
-let keys = {l:false, r:false};
-document.getElementById('lBtn').ontouchstart = (e) => { e.preventDefault(); keys.l = true; };
-document.getElementById('lBtn').ontouchend = () => keys.l = false;
-document.getElementById('rBtn').ontouchstart = (e) => { e.preventDefault(); keys.r = true; };
-document.getElementById('rBtn').ontouchend = () => keys.r = false;
-document.getElementById('jBtn').ontouchstart = (e) => { e.preventDefault(); if(player.grounded) player.velY = -16; };
+let keys = {l: false, r: false};
+document.getElementById('lBtn').addEventListener('touchstart', (e) => { e.preventDefault(); keys.l = true; });
+document.getElementById('lBtn').addEventListener('touchend', (e) => { e.preventDefault(); keys.l = false; });
+document.getElementById('rBtn').addEventListener('touchstart', (e) => { e.preventDefault(); keys.r = true; });
+document.getElementById('rBtn').addEventListener('touchend', (e) => { e.preventDefault(); keys.r = false; });
+document.getElementById('jBtn').addEventListener('touchstart', (e) => { e.preventDefault(); if (player.grounded) player.velY = -16; });
 
-initLevel(); draw();
+initLevel(currentLvl); draw();
 </script>
 </body>
 </html>
-
