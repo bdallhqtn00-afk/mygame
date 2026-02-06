@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>مغامرة المليار ⚔️💰</title>
+    <title>نقرة الملك 👑</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@700;900&display=swap');
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -17,7 +17,6 @@
         }
         @keyframes gradientBG { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
 
-        /* زر إعادة الضبط الصغير والبعيد */
         .reset-btn {
             position: fixed; top: 10px; left: 10px;
             padding: 5px 10px; background: rgba(220, 38, 38, 0.4);
@@ -25,7 +24,6 @@
             border-radius: 5px; font-size: 0.6rem; cursor: pointer;
             transition: 0.3s; z-index: 1000;
         }
-        .reset-btn:hover { background: rgba(220, 38, 38, 1); }
 
         .info-bar {
             width: 90%; background: rgba(0,0,0,0.6); padding: 15px;
@@ -68,7 +66,7 @@
 </head>
 <body onload="init()">
 
-    <button class="reset-btn" onclick="resetGame()">إعادة اللعب من الصفر ⚠️</button>
+    <button class="reset-btn" onclick="resetGame()">إعادة اللعب ⚠️</button>
 
     <audio id="snd-tap" src="https://www.myinstants.com/media/sounds/coin-drop-1.mp3"></audio>
     <audio id="snd-buy" src="https://www.myinstants.com/media/sounds/duck-quack_1.mp3"></audio>
@@ -76,24 +74,22 @@
     <div class="info-bar">
         <div id="score">0</div>
         <div class="timer">وقت اللعب: <span id="game-time">00:00</span></div>
-        <div style="font-size:0.8rem">القوة: <span id="pwr-display">1</span> ⚔️</div>
+        <div style="font-size:0.8rem">القوة: <span id="pwr-display">3500</span> ⚔️</div>
     </div>
 
     <div class="main-btn" onclick="handleTap(event)">🪙</div>
 
-    <button class="open-shop-btn" onclick="toggleShop(true)">🛒 فتح المتجر</button>
+    <button class="open-shop-btn" onclick="toggleShop(true)">🛒 المتجر</button>
 
     <div id="shop" class="shop-overlay">
         <h2 style="color:#fbbf24">متجر الأساطير</h2>
         <div class="shop-content" id="shop-items"></div>
-        <button onclick="toggleShop(false)" style="margin-top:20px; background:white; padding:10px 30px; border-radius:10px; border:none;">عودة للعب</button>
+        <button onclick="toggleShop(false)" style="margin-top:20px; background:white; padding:10px 30px; border-radius:10px; border:none;">عودة</button>
     </div>
 
     <script>
-        let gold = 0, pwr = 1,let gold = 1000000, pwr = 3500, seconds = 0;
-
-
-
+        // القيم المعدلة لاستعادة حقك
+        let gold = 1000000, pwr = 3500, seconds = 0;
         let upgrades = [
             { name: "خنجر خشبي", cost: 50, gain: 2, req: 0 },
             { name: "سيف فولاذي", cost: 500, gain: 10, req: 1000 },
@@ -132,9 +128,9 @@
         }
 
         function resetGame() {
-            if(confirm("هل أنت متأكد؟ ستمسح كل ذهبك وتطويراتك لتبدأ من جديد!")) {
+            if(confirm("هل تريد تصفير العداد؟")) {
                 localStorage.removeItem('billion_game');
-                location.reload();
+                gold = 0; pwr = 1; location.reload();
             }
         }
 
