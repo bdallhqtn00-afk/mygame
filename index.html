@@ -3,137 +3,136 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>أسطورة النقرات الأسطورية ⚔️</title>
+    <title>أسطورة النقرات الملونة 🌈🪙</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@700;900&display=swap');
-        
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        
+
+        /* الخلفية الملونة المتحركة */
         body {
-            margin: 0; padding: 0; height: 100vh;
-            display: flex; flex-direction: column; align-items: center;
-            justify-content: space-between; background: #0f172a;
-            color: white; font-family: 'Cairo', sans-serif; overflow: hidden;
+            margin: 0; height: 100vh; display: flex; flex-direction: column;
+            align-items: center; justify-content: space-between;
+            font-family: 'Cairo', sans-serif; overflow: hidden; user-select: none;
+            background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+            background-size: 400% 400%; animation: gradientBG 10s ease infinite;
         }
 
-        /* حاوية العداد العلوية */
-        .score-board {
-            width: 90%; background: rgba(30, 41, 59, 0.7);
-            margin-top: 20px; padding: 15px; border-radius: 20px;
-            text-align: center; border: 2px solid #eab308;
-            box-shadow: 0 0 20px rgba(234, 179, 8, 0.2);
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
-        #gold-count { font-size: 3.5rem; color: #eab308; margin: 0; font-weight: 900; }
-        .label { color: #94a3b8; font-size: 0.9rem; }
 
-        /* منطقة العملة المركزية */
-        .click-zone { flex-grow: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; }
-        
-        .main-coin {
-            width: 220px; height: 220px; position: relative; cursor: pointer;
-            background: radial-gradient(circle, #facc15 0%, #ca8a04 100%);
-            border-radius: 50%; border: 10px solid #854d0e;
-            box-shadow: 0 15px 0 #451a03, 0 30px 50px rgba(0,0,0,0.5);
+        /* حاوية العداد */
+        .score-box {
+            margin-top: 30px; background: rgba(0, 0, 0, 0.5);
+            padding: 15px 40px; border-radius: 30px; border: 3px solid #fbbf24;
+            text-align: center; backdrop-filter: blur(10px);
+        }
+        #score { font-size: 4rem; color: #fbbf24; margin: 0; text-shadow: 0 0 15px rgba(251, 191, 36, 0.6); }
+
+        /* الزر الذهبي الضخم */
+        .coin-container { position: relative; }
+        #main-btn {
+            width: 220px; height: 220px; border-radius: 50%;
+            background: radial-gradient(circle, #fcd34d, #b45309);
+            border: 8px solid #78350f; cursor: pointer;
+            box-shadow: 0 15px 0 #451a03, 0 20px 40px rgba(0,0,0,0.4);
             display: flex; align-items: center; justify-content: center;
-            transition: transform 0.05s ease;
+            font-size: 6rem; transition: transform 0.05s;
         }
-        .main-coin::after { content: "1"; font-size: 8rem; color: rgba(0,0,0,0.1); font-weight: 900; }
-        
-        .main-coin:active {
+        #main-btn:active {
             transform: translateY(10px);
-            box-shadow: 0 5px 0 #451a03, 0 10px 20px rgba(0,0,0,0.5);
-        }
-
-        .power-tag {
-            margin-top: 30px; background: #eab308; color: #000;
-            padding: 5px 25px; border-radius: 50px; font-weight: 900;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            box-shadow: 0 5px 0 #451a03, 0 10px 20px rgba(0,0,0,0.4);
         }
 
         /* المتجر السفلي */
-        .shop-nav {
-            width: 100%; display: grid; grid-template-columns: 1fr 1fr 1fr;
-            gap: 10px; padding: 15px; background: #1e293b; border-top: 3px solid #334155;
+        .shop {
+            width: 100%; display: flex; justify-content: space-around;
+            padding: 20px 0; background: rgba(0, 0, 0, 0.7); border-top: 3px solid #fbbf24;
         }
         .item {
-            background: #0f172a; border: 1px solid #334155;
-            padding: 10px; border-radius: 12px; text-align: center;
+            background: #262626; border: 2px solid #444; border-radius: 15px;
+            padding: 10px; width: 30%; text-align: center; color: #fbbf24;
         }
-        .item.can-buy { border-color: #eab308; background: #1e1b4b; }
-        .item b { display: block; color: #eab308; font-size: 1rem; }
-        .item span { font-size: 0.75rem; color: #64748b; }
+        .item.ready { border-color: #fbbf24; background: #333; box-shadow: 0 0 10px #fbbf24; }
+        .item.locked { opacity: 0.5; }
 
-        .floating-num {
-            position: absolute; color: #eab308; font-size: 2.5rem;
-            font-weight: 900; pointer-events: none;
-            animation: moveUp 0.8s ease-out forwards;
+        .floating {
+            position: absolute; color: white; font-size: 2.5rem; font-weight: 900;
+            animation: floatUp 0.7s forwards; pointer-events: none;
         }
-        @keyframes moveUp { 0% { transform: translateY(0); opacity: 1; } 100% { transform: translateY(-150px); opacity: 0; } }
+        @keyframes floatUp { 0% { transform: translateY(0); opacity: 1; } 100% { transform: translateY(-150px); opacity: 0; } }
     </style>
 </head>
-<body onload="loadData()">
+<body onload="load()">
 
-    <audio id="s-click" src="https://www.myinstants.com/media/sounds/coin-drop-1.mp3"></audio>
-    <audio id="s-buy" src="https://www.myinstants.com/media/sounds/level-up-1.mp3"></audio>
-
-    <div class="score-board">
-        <div id="gold-count">0</div>
-        <div class="label">ذهب الأساطير 💰</div>
+    <audio id="snd-tap" src="https://www.myinstants.com/media/sounds/coin-drop-1.mp3"></audio>
+    <audio id="snd-buy" src="https://www.myinstants.com/media/sounds/meme-de-pato.mp3"></audio> <div class="score-box">
+        <div id="score">0</div>
+        <div style="color:white">ذهب الأساطير 💰</div>
     </div>
 
-    <div class="click-zone">
-        <div class="main-coin" onclick="handleTap(event)"></div>
-        <div class="power-tag">القوة: <span id="pwr-val">1</span> ⚔️</div>
+    <div class="coin-container">
+        <div id="main-btn" onclick="tap(event)">🪙</div>
+        <div style="text-align:center; margin-top:20px; background:white; color:black; padding:5px; border-radius:20px; font-weight:900;">
+            القوة: <span id="pwr">1</span> ⚔️
+        </div>
     </div>
 
-    <div class="shop-nav">
-        <div class="item" id="u0" onclick="buy(0)"><b>خنجر</b><span id="c0">50 💰</span></div>
-        <div class="item" id="u1" onclick="buy(1)"><b>سيف</b><span id="c1">300 💰</span></div>
-        <div class="item" id="u2" onclick="buy(2)"><b>فأس</b><span id="c2">1000 💰</span></div>
+    <div class="shop">
+        <div class="item" id="u0" onclick="buy(0)"><b>خنجر</b><br><span id="c0">50💰</span></div>
+        <div class="item" id="u1" onclick="buy(1)"><b>سيف</b><br><span id="c1">300💰</span></div>
+        <div class="item" id="u2" onclick="buy(2)"><b>فأس</b><br><span id="c2">1000💰</span></div>
     </div>
 
     <script>
-        let gold = 0; let pwr = 1;
-        let prices = [50, 300, 1000];
+        let gold = 0, pwr = 1;
+        let costs = [50, 300, 1000];
         let boost = [1, 10, 50];
 
-        function handleTap(e) {
+        function tap(e) {
             gold += pwr;
-            document.getElementById('s-click').currentTime = 0;
-            document.getElementById('s-click').play().catch(()=>{});
+            const s = document.getElementById('snd-tap');
+            s.currentTime = 0; s.play().catch(()=>{});
             
-            const n = document.createElement('div');
-            n.className = 'floating-num'; n.innerText = `+${pwr}`;
-            n.style.left = e.pageX + 'px'; n.style.top = e.pageY + 'px';
-            document.body.appendChild(n);
-            setTimeout(() => n.remove(), 800);
-            
-            refresh(); save();
+            // اهتزاز
+            if(navigator.vibrate) navigator.vibrate(20);
+
+            // رقم طائر
+            const f = document.createElement('div');
+            f.className = 'floating'; f.innerText = `+${pwr}`;
+            f.style.left = e.pageX + 'px'; f.style.top = e.pageY + 'px';
+            document.body.appendChild(f);
+            setTimeout(()=>f.remove(), 700);
+
+            render(); save();
         }
 
         function buy(i) {
-            if (gold >= prices[i]) {
-                gold -= prices[i]; pwr += boost[i];
-                prices[i] = Math.floor(prices[i] * 1.8);
-                document.getElementById('s-buy').play().catch(()=>{});
-                refresh(); save();
+            if (gold >= costs[i]) {
+                gold -= costs[i];
+                pwr += boost[i];
+                costs[i] = Math.floor(costs[i] * 1.8);
+                document.getElementById('snd-buy').play().catch(()=>{});
+                render(); save();
             }
         }
 
-        function refresh() {
-            document.getElementById('gold-count').innerText = Math.floor(gold);
-            document.getElementById('pwr-val').innerText = pwr;
+        function render() {
+            document.getElementById('score').innerText = Math.floor(gold);
+            document.getElementById('pwr').innerText = pwr;
             for(let i=0; i<3; i++) {
-                document.getElementById('c'+i).innerText = prices[i] + ' 💰';
-                document.getElementById('u'+i).className = gold >= prices[i] ? 'item can-buy' : 'item';
+                document.getElementById('c'+i).innerText = costs[i] + '💰';
+                const el = document.getElementById('u'+i);
+                el.className = gold >= costs[i] ? 'item ready' : 'item locked';
             }
         }
 
-        function save() { localStorage.setItem('game_vfinal', JSON.stringify({gold, pwr, prices})); }
-        function loadData() {
-            const d = JSON.parse(localStorage.getItem('game_vfinal'));
-            if(d) { gold = d.gold; pwr = d.pwr; prices = d.prices; }
-            refresh();
+        function save() { localStorage.setItem('yemen_v3', JSON.stringify({gold, pwr, costs})); }
+        function load() {
+            const d = JSON.parse(localStorage.getItem('yemen_v3'));
+            if(d) { gold = d.gold; pwr = d.pwr; costs = d.costs; }
+            render();
         }
     </script>
 </body>
