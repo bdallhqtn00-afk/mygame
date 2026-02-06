@@ -3,164 +3,155 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>أسطورة النقرات: المجرة 🌌</title>
+    <title>أسطورة النقرات الأسطورية ⚔️</title>
     <style>
-        :root { --gold: #f1c40f; --space: #1a1a2e; }
-        body {
-            margin: 0; height: 100vh; display: flex; flex-direction: column;
-            justify-content: center; align-items: center;
-            background: #000; overflow: hidden; font-family: 'Cairo', sans-serif;
-            color: white; user-select: none;
-            /* خلفية فضاء متحركة */
-            background: radial-gradient(ellipse at bottom, #1B2735 0%, #090A0F 100%);
-        }
-
-        /* إضافة نجوم متحركة بالخلفية */
-        .stars { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
-
-        #score-container {
-            text-align: center; z-index: 10;
-            background: rgba(255, 255, 255, 0.1);
-            padding: 20px 50px; border-radius: 20px;
-            backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.2);
-            box-shadow: 0 0 30px rgba(241, 196, 15, 0.2);
-        }
-
-        h1 { font-size: 4rem; margin: 0; color: var(--gold); text-shadow: 0 0 20px rgba(241,196,15,0.5); }
-
-        #coin-wrapper { position: relative; margin: 40px 0; z-index: 10; }
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@700;900&display=swap');
         
-        #coin {
-            width: 220px; height: 220px;
+        body {
+            margin: 0; height: 100vh; overflow: hidden;
+            display: flex; flex-direction: column; align-items: center;
+            font-family: 'Cairo', sans-serif; background: #050505;
+            color: white; user-select: none;
+        }
+
+        /* خلفية النجوم المتحركة */
+        .stars-container {
+            position: fixed; width: 100%; height: 100%;
+            background: radial-gradient(ellipse at bottom, #1B2735 0%, #090A0F 100%);
+            z-index: -1;
+        }
+
+        /* حاوية النقاط */
+        .score-panel {
+            margin-top: 50px; text-align: center;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 20px 40px; border-radius: 25px;
+            border: 2px solid rgba(251, 191, 36, 0.3);
+            backdrop-filter: blur(10px);
+        }
+
+        #score { font-size: 5rem; color: #fbbf24; margin: 0; text-shadow: 0 0 20px rgba(251, 191, 36, 0.5); }
+        .label { font-size: 1.2rem; color: #a1a1aa; }
+
+        /* العملة الكبيرة */
+        .coin-btn {
+            width: 200px; height: 200px; margin: 40px 0;
             background: url('https://cdn-icons-png.flaticon.com/512/217/217853.png') no-repeat center;
             background-size: contain; cursor: pointer;
-            filter: drop-shadow(0 0 20px var(--gold));
-            transition: transform 0.05s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            filter: drop-shadow(0 0 15px #fbbf24);
+            transition: transform 0.05s;
+        }
+        .coin-btn:active { transform: scale(0.85) rotate(-5deg); }
+
+        /* شريط القوة */
+        .power-tag { background: #1e1b4b; padding: 5px 20px; border-radius: 50px; border: 1px solid #4338ca; margin-bottom: 50px; }
+
+        /* المتجر الأسفل */
+        .shop {
+            position: fixed; bottom: 20px; display: flex; gap: 10px;
+            width: 95%; justify-content: center;
         }
 
-        #coin:active { transform: scale(0.9) rotate(5deg); }
-
-        .shop-panel {
-            position: fixed; bottom: 30px; display: flex; gap: 15px; z-index: 20;
+        .item {
+            background: linear-gradient(145deg, #1f2937, #111827);
+            border: 1px solid #374151; padding: 15px 10px;
+            border-radius: 15px; text-align: center; flex: 1;
+            max-width: 110px; transition: 0.2s;
         }
+        .item:active:not(.locked) { transform: scale(0.95); background: #374151; }
+        .item b { display: block; color: #fbbf24; font-size: 1rem; }
+        .item span { font-size: 0.8rem; color: #9ca3af; }
+        .locked { opacity: 0.5; filter: grayscale(1); }
 
-        .upgrade-card {
-            background: rgba(255,255,255,0.1); padding: 15px; border-radius: 15px;
-            border: 1px solid var(--gold); text-align: center; min-width: 100px;
-            backdrop-filter: blur(5px); transition: 0.3s;
+        /* أنيميشن الأرقام */
+        .plus {
+            position: absolute; color: #fbbf24; font-size: 2.5rem;
+            font-weight: 900; animation: float 0.8s ease-out forwards;
+            pointer-events: none; z-index: 100;
         }
-
-        .upgrade-card:active { transform: translateY(-5px); }
-        .upgrade-card b { display: block; color: var(--gold); }
-        .price { font-size: 0.8rem; display: block; margin-top: 5px; }
-
-        .plus-animation {
-            position: absolute; color: var(--gold); font-weight: bold; font-size: 2rem;
-            pointer-events: none; animation: floatUp 0.8s ease-out forwards; z-index: 100;
-        }
-
-        @keyframes floatUp {
-            0% { transform: translateY(0) scale(1); opacity: 1; }
-            100% { transform: translateY(-200px) scale(1.5); opacity: 0; }
-        }
+        @keyframes float { 0% { transform: translateY(0); opacity: 1; } 100% { transform: translateY(-200px); opacity: 0; } }
     </style>
 </head>
-<body onload="loadGame()">
+<body onload="load()">
 
-    <div class="stars"></div>
+    <div class="stars-container"></div>
 
-    <div id="score-container">
+    <div class="score-panel">
         <h1 id="score">0</h1>
-        <div style="color: #aaa;">النقرات الذهبية 💰</div>
+        <div class="label">ذهب الأساطير 💰</div>
     </div>
 
-    <div id="coin-wrapper">
-        <div id="coin" onclick="handleTap(event)"></div>
-    </div>
+    <div class="coin-btn" onclick="tap(event)"></div>
 
-    <div style="font-size: 1.2rem; margin-bottom: 100px;">القوة: <span id="click-power" style="color:var(--gold)">1</span> ⚔️</div>
+    <div class="power-tag">قوة الضربة: <span id="pwr" style="color:#fbbf24">1</span> ⚔️</div>
 
-    <div class="shop-panel">
-        <div class="upgrade-card" onclick="buy(1, 50, 1)">
+    <div class="shop">
+        <div class="item" id="i1" onclick="buy(0)">
             <b>خنجر</b>
-            <span class="price">💰 <span id="cost1">50</span></span>
+            <span id="c1">50 💰</span>
         </div>
-        <div class="upgrade-card" onclick="buy(2, 300, 10)">
+        <div class="item" id="i2" onclick="buy(1)">
             <b>سيف</b>
-            <span class="price">💰 <span id="cost2">300</span></span>
+            <span id="c2">300 💰</span>
         </div>
-        <div class="upgrade-card" onclick="buy(3, 1000, 50)">
+        <div class="item" id="i3" onclick="buy(2)">
             <b>فأس</b>
-            <span class="price">💰 <span id="cost3">1000</span></span>
+            <span id="c3">1000 💰</span>
         </div>
     </div>
 
     <script>
-        let score = 0;
-        let clickPower = 1;
+        let gold = 0; let pwr = 1;
         let costs = [50, 300, 1000];
+        let gains = [1, 10, 50];
 
-        // مدمج أصوات بنظام الـ Data URI لضمان العمل بدون ملفات خارجية
-        const sndTap = new Audio('https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3');
-        const sndBuy = new Audio('https://assets.mixkit.co/active_storage/sfx/2017/2017-preview.mp3');
+        // أصوات عالية الجودة
+        const tapSnd = new Audio('https://www.soundjay.com/buttons/sounds/button-37.mp3');
+        const buySnd = new Audio('https://www.soundjay.com/buttons/sounds/button-09.mp3');
 
-        function handleTap(e) {
-            score += clickPower;
+        function tap(e) {
+            gold += pwr;
+            tapSnd.currentTime = 0; tapSnd.play().catch(()=>{});
             
-            // صوت واهتزاز
-            sndTap.currentTime = 0;
-            sndTap.play().catch(()=>{});
-            if(navigator.vibrate) navigator.vibrate(20);
+            // اهتزاز الجوال
+            if(navigator.vibrate) navigator.vibrate(15);
 
-            // أنيميشن الرقم
-            const plus = document.createElement('div');
-            plus.className = 'plus-animation';
-            plus.innerText = `+${clickPower}`;
-            plus.style.left = e.pageX + 'px';
-            plus.style.top = e.pageY + 'px';
-            document.body.appendChild(plus);
-            setTimeout(() => plus.remove(), 800);
+            // أنيميشن +
+            const p = document.createElement('div');
+            p.className = 'plus'; p.innerText = `+${pwr}`;
+            p.style.left = e.pageX + 'px'; p.style.top = e.pageY + 'px';
+            document.body.appendChild(p);
+            setTimeout(()=>p.remove(), 800);
 
-            updateUI();
-            saveGame();
+            render(); save();
         }
 
-        function buy(id, initialCost, power) {
-            let index = id - 1;
-            let currentCost = costs[index];
-            if (score >= currentCost) {
-                score -= currentCost;
-                clickPower += power;
-                costs[index] = Math.floor(currentCost * 1.8);
-                sndBuy.play().catch(()=>{});
-                updateUI();
-                saveGame();
-            } else {
-                alert("ينقصك المزيد من الذهب!");
+        function buy(idx) {
+            if (gold >= costs[idx]) {
+                gold -= costs[idx];
+                pwr += gains[idx];
+                costs[idx] = Math.floor(costs[idx] * 1.8);
+                buySnd.play().catch(()=>{});
+                render(); save();
             }
         }
 
-        function updateUI() {
-            document.getElementById('score').innerText = Math.floor(score);
-            document.getElementById('click-power').innerText = clickPower;
-            document.getElementById('cost1').innerText = costs[0];
-            document.getElementById('cost2').innerText = costs[1];
-            document.getElementById('cost3').innerText = costs[2];
-        }
-
-        function saveGame() {
-            localStorage.setItem('megaClicker_save', JSON.stringify({score, clickPower, costs}));
-        }
-
-        function loadGame() {
-            const saved = localStorage.getItem('megaClicker_save');
-            if (saved) {
-                const data = JSON.parse(saved);
-                score = data.score;
-                clickPower = data.clickPower;
-                costs = data.costs;
-                updateUI();
+        function render() {
+            document.getElementById('score').innerText = Math.floor(gold);
+            document.getElementById('pwr').innerText = pwr;
+            for(let i=0; i<3; i++) {
+                document.getElementById(`c${i+1}`).innerText = costs[i] + " 💰";
+                document.getElementById(`i${i+1}`).className = gold >= costs[i] ? 'item' : 'item locked';
             }
+        }
+
+        function save() {
+            localStorage.setItem('hero_clicker', JSON.stringify({gold, pwr, costs}));
+        }
+
+        function load() {
+            const d = JSON.parse(localStorage.getItem('hero_clicker'));
+            if(d) { gold = d.gold; pwr = d.pwr; costs = d.costs; render(); }
         }
     </script>
 </body>
