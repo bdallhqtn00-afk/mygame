@@ -3,102 +3,113 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>أسطورة النقرات الملونة 🌈🪙</title>
+    <title>مغامرة المليار ⚔️💰</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@700;900&display=swap');
-
-        /* الخلفية الملونة المتحركة */
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        
         body {
             margin: 0; height: 100vh; display: flex; flex-direction: column;
-            align-items: center; justify-content: space-between;
+            align-items: center; justify-content: space-around;
             font-family: 'Cairo', sans-serif; overflow: hidden; user-select: none;
             background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
-            background-size: 400% 400%; animation: gradientBG 10s ease infinite;
+            background-size: 400% 400%; animation: gradientBG 15s ease infinite;
         }
+        @keyframes gradientBG { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
 
-        @keyframes gradientBG {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
+        /* عداد الوقت والنقاط */
+        .info-bar {
+            width: 90%; background: rgba(0,0,0,0.6); padding: 15px;
+            border-radius: 20px; text-align: center; border: 2px solid #fbbf24; color: white;
         }
+        #score { font-size: 3.5rem; color: #fbbf24; margin: 0; line-height: 1; }
+        .timer { font-size: 0.9rem; color: #ddd; margin-top: 5px; }
 
-        /* حاوية العداد */
-        .score-box {
-            margin-top: 30px; background: rgba(0, 0, 0, 0.5);
-            padding: 15px 40px; border-radius: 30px; border: 3px solid #fbbf24;
-            text-align: center; backdrop-filter: blur(10px);
-        }
-        #score { font-size: 4rem; color: #fbbf24; margin: 0; text-shadow: 0 0 15px rgba(251, 191, 36, 0.6); }
-
-        /* الزر الذهبي الضخم */
-        .coin-container { position: relative; }
-        #main-btn {
-            width: 220px; height: 220px; border-radius: 50%;
+        /* الزر الكبير */
+        .main-btn {
+            width: 200px; height: 200px; border-radius: 50%;
             background: radial-gradient(circle, #fcd34d, #b45309);
             border: 8px solid #78350f; cursor: pointer;
             box-shadow: 0 15px 0 #451a03, 0 20px 40px rgba(0,0,0,0.4);
             display: flex; align-items: center; justify-content: center;
             font-size: 6rem; transition: transform 0.05s;
         }
-        #main-btn:active {
-            transform: translateY(10px);
-            box-shadow: 0 5px 0 #451a03, 0 10px 20px rgba(0,0,0,0.4);
+        .main-btn:active { transform: translateY(10px); box-shadow: 0 5px 0 #451a03; }
+
+        /* زر فتح المتجر */
+        .open-shop-btn {
+            padding: 15px 40px; background: #fbbf24; color: #000;
+            border: none; border-radius: 50px; font-weight: 900;
+            font-size: 1.2rem; cursor: pointer; box-shadow: 0 5px 15px rgba(0,0,0,0.3);
         }
 
-        /* المتجر السفلي */
-        .shop {
-            width: 100%; display: flex; justify-content: space-around;
-            padding: 20px 0; background: rgba(0, 0, 0, 0.7); border-top: 3px solid #fbbf24;
+        /* نافذة المتجر (Popup) */
+        .shop-overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9); z-index: 100; flex-direction: column; align-items: center; padding-top: 50px;
         }
-        .item {
-            background: #262626; border: 2px solid #444; border-radius: 15px;
-            padding: 10px; width: 30%; text-align: center; color: #fbbf24;
+        .shop-content { width: 90%; max-width: 400px; }
+        .upgrade-card {
+            background: #1e293b; margin: 10px 0; padding: 15px;
+            border-radius: 15px; display: flex; justify-content: space-between;
+            align-items: center; border: 1px solid #334155;
         }
-        .item.ready { border-color: #fbbf24; background: #333; box-shadow: 0 0 10px #fbbf24; }
-        .item.locked { opacity: 0.5; }
+        .upgrade-card.locked { opacity: 0.3; pointer-events: none; }
+        .buy-btn { background: #fbbf24; color: #000; border: none; padding: 10px; border-radius: 10px; font-weight: bold; }
 
-        .floating {
-            position: absolute; color: white; font-size: 2.5rem; font-weight: 900;
-            animation: floatUp 0.7s forwards; pointer-events: none;
-        }
+        .floating { position: absolute; color: white; font-size: 2.5rem; font-weight: 900; animation: floatUp 0.7s forwards; pointer-events: none; }
         @keyframes floatUp { 0% { transform: translateY(0); opacity: 1; } 100% { transform: translateY(-150px); opacity: 0; } }
     </style>
 </head>
-<body onload="load()">
+<body onload="init()">
 
     <audio id="snd-tap" src="https://www.myinstants.com/media/sounds/coin-drop-1.mp3"></audio>
-    <audio id="snd-buy" src="https://www.myinstants.com/media/sounds/meme-de-pato.mp3"></audio> <div class="score-box">
+    <audio id="snd-buy" src="https://www.myinstants.com/media/sounds/duck-quack_1.mp3"></audio>
+
+    <div class="info-bar">
         <div id="score">0</div>
-        <div style="color:white">ذهب الأساطير 💰</div>
+        <div class="timer">وقت اللعب: <span id="game-time">00:00</span></div>
+        <div style="font-size:0.8rem">القوة الحالية: <span id="pwr-display">1</span></div>
     </div>
 
-    <div class="coin-container">
-        <div id="main-btn" onclick="tap(event)">🪙</div>
-        <div style="text-align:center; margin-top:20px; background:white; color:black; padding:5px; border-radius:20px; font-weight:900;">
-            القوة: <span id="pwr">1</span> ⚔️
-        </div>
+    <div id="tap-zone" style="position:relative">
+        <div class="main-btn" onclick="handleTap(event)">🪙</div>
     </div>
 
-    <div class="shop">
-        <div class="item" id="u0" onclick="buy(0)"><b>خنجر</b><br><span id="c0">50💰</span></div>
-        <div class="item" id="u1" onclick="buy(1)"><b>سيف</b><br><span id="c1">300💰</span></div>
-        <div class="item" id="u2" onclick="buy(2)"><b>فأس</b><br><span id="c2">1000💰</span></div>
+    <button class="open-shop-btn" onclick="toggleShop(true)">🛒 فتح المتجر</button>
+
+    <div id="shop" class="shop-overlay">
+        <h2 style="color:#fbbf24">متجر الأساطير</h2>
+        <div class="shop-content" id="shop-items">
+            </div>
+        <button onclick="toggleShop(false)" style="margin-top:20px; background:white; padding:10px 30px; border-radius:10px; border:none;">إغلاق</button>
     </div>
 
     <script>
-        let gold = 0, pwr = 1;
-        let costs = [50, 300, 1000];
-        let boost = [1, 10, 50];
+        let gold = 0, pwr = 1, seconds = 0;
+        let upgrades = [
+            { name: "خنجر خشبي", cost: 50, gain: 2, req: 0 },
+            { name: "سيف فولاذي", cost: 500, gain: 10, req: 1000 },
+            { name: "فأس ذهبي", cost: 5000, gain: 50, req: 10000 },
+            { name: "درع المليار", cost: 100000, gain: 500, req: 50000 }
+        ];
 
-        function tap(e) {
+        function init() {
+            load();
+            setInterval(() => {
+                seconds++;
+                let m = Math.floor(seconds / 60);
+                let s = seconds % 60;
+                document.getElementById('game-time').innerText = `${m}:${s < 10 ? '0' + s : s}`;
+            }, 1000);
+            render();
+        }
+
+        function handleTap(e) {
             gold += pwr;
-            const s = document.getElementById('snd-tap');
-            s.currentTime = 0; s.play().catch(()=>{});
+            document.getElementById('snd-tap').currentTime = 0;
+            document.getElementById('snd-tap').play().catch(()=>{});
             
-            // اهتزاز
-            if(navigator.vibrate) navigator.vibrate(20);
-
-            // رقم طائر
             const f = document.createElement('div');
             f.className = 'floating'; f.innerText = `+${pwr}`;
             f.style.left = e.pageX + 'px'; f.style.top = e.pageY + 'px';
@@ -109,30 +120,47 @@
         }
 
         function buy(i) {
-            if (gold >= costs[i]) {
-                gold -= costs[i];
-                pwr += boost[i];
-                costs[i] = Math.floor(costs[i] * 1.8);
+            if (gold >= upgrades[i].cost) {
+                gold -= upgrades[i].cost;
+                pwr += upgrades[i].gain;
+                upgrades[i].cost = Math.floor(upgrades[i].cost * 2);
                 document.getElementById('snd-buy').play().catch(()=>{});
                 render(); save();
             }
         }
 
-        function render() {
-            document.getElementById('score').innerText = Math.floor(gold);
-            document.getElementById('pwr').innerText = pwr;
-            for(let i=0; i<3; i++) {
-                document.getElementById('c'+i).innerText = costs[i] + '💰';
-                const el = document.getElementById('u'+i);
-                el.className = gold >= costs[i] ? 'item ready' : 'item locked';
-            }
+        function toggleShop(show) {
+            document.getElementById('shop').style.display = show ? 'flex' : 'none';
         }
 
-        function save() { localStorage.setItem('yemen_v3', JSON.stringify({gold, pwr, costs})); }
+        function render() {
+            document.getElementById('score').innerText = Math.floor(gold);
+            document.getElementById('pwr-display').innerText = pwr;
+            
+            let html = "";
+            upgrades.forEach((u, i) => {
+                let isLocked = gold < u.req && pwr < (u.gain); // نظام تحدي بسيط
+                html += `
+                    <div class="upgrade-card ${gold < u.req ? 'locked' : ''}">
+                        <div style="color:white">
+                            <b>${u.name}</b><br>
+                            <small>${u.cost} 💰 | +${u.gain} قوة</small>
+                            ${gold < u.req ? `<br><small style="color:red">افتح عند ${u.req} ذهب</small>` : ''}
+                        </div>
+                        <button class="buy-btn" onclick="buy(${i})" ${gold < u.cost ? 'disabled' : ''}>تطوير</button>
+                    </div>
+                `;
+            });
+            document.getElementById('shop-items').innerHTML = html;
+        }
+
+        function save() { localStorage.setItem('billion_game', JSON.stringify({gold, pwr, upgrades, seconds})); }
         function load() {
-            const d = JSON.parse(localStorage.getItem('yemen_v3'));
-            if(d) { gold = d.gold; pwr = d.pwr; costs = d.costs; }
-            render();
+            const d = JSON.parse(localStorage.getItem('billion_game'));
+            if(d) {
+                gold = d.gold; pwr = d.pwr; seconds = d.seconds || 0;
+                if(d.upgrades) upgrades = d.upgrades;
+            }
         }
     </script>
 </body>
