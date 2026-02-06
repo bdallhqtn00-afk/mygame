@@ -3,178 +3,137 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>أسطورة النقرات ⚔️</title>
+    <title>أسطورة النقرات الأسطورية ⚔️</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@700;900&display=swap');
         
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        
         body {
-            margin: 0; height: 100vh; display: flex; flex-direction: column;
-            align-items: center; justify-content: space-between;
-            background: #0a0a0a; color: white; font-family: 'Cairo', sans-serif;
-            overflow: hidden; user-select: none;
-            background: radial-gradient(circle at center, #1e1e1e 0%, #000000 100%);
+            margin: 0; padding: 0; height: 100vh;
+            display: flex; flex-direction: column; align-items: center;
+            justify-content: space-between; background: #0f172a;
+            color: white; font-family: 'Cairo', sans-serif; overflow: hidden;
         }
 
-        /* حاوية النقاط - تصميم فخم */
-        .header {
-            width: 90%; background: rgba(255, 255, 255, 0.05);
-            margin-top: 30px; padding: 20px; border-radius: 20px;
-            text-align: center; border: 2px solid #fbbf24;
-            box-shadow: 0 0 20px rgba(251, 191, 36, 0.2);
+        /* حاوية العداد العلوية */
+        .score-board {
+            width: 90%; background: rgba(30, 41, 59, 0.7);
+            margin-top: 20px; padding: 15px; border-radius: 20px;
+            text-align: center; border: 2px solid #eab308;
+            box-shadow: 0 0 20px rgba(234, 179, 8, 0.2);
         }
-        #score { font-size: 4rem; color: #fbbf24; margin: 0; display: block; }
-        .label { font-size: 1rem; color: #888; letter-spacing: 2px; }
+        #gold-count { font-size: 3.5rem; color: #eab308; margin: 0; font-weight: 900; }
+        .label { color: #94a3b8; font-size: 0.9rem; }
 
-        /* منطقة النقر - الزر الضخم */
-        .click-area {
-            position: relative; display: flex; flex-direction: column; align-items: center;
-        }
-        #main-button {
-            width: 220px; height: 220px; border-radius: 50%;
-            background: linear-gradient(145deg, #fbbf24, #d97706);
-            border: 8px solid #92400e; cursor: pointer;
-            box-shadow: 0 15px 0 #78350f, 0 20px 40px rgba(0,0,0,0.5);
+        /* منطقة العملة المركزية */
+        .click-zone { flex-grow: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+        
+        .main-coin {
+            width: 220px; height: 220px; position: relative; cursor: pointer;
+            background: radial-gradient(circle, #facc15 0%, #ca8a04 100%);
+            border-radius: 50%; border: 10px solid #854d0e;
+            box-shadow: 0 15px 0 #451a03, 0 30px 50px rgba(0,0,0,0.5);
             display: flex; align-items: center; justify-content: center;
-            font-size: 6rem; transition: all 0.05s ease;
+            transition: transform 0.05s ease;
         }
-        #main-button:active {
+        .main-coin::after { content: "1"; font-size: 8rem; color: rgba(0,0,0,0.1); font-weight: 900; }
+        
+        .main-coin:active {
             transform: translateY(10px);
-            box-shadow: 0 5px 0 #78350f, 0 10px 20px rgba(0,0,0,0.5);
+            box-shadow: 0 5px 0 #451a03, 0 10px 20px rgba(0,0,0,0.5);
         }
 
-        /* القوة */
-        .power-info {
-            background: #fbbf24; color: #000; padding: 5px 20px;
-            border-radius: 50px; font-weight: 900; margin-top: 20px;
+        .power-tag {
+            margin-top: 30px; background: #eab308; color: #000;
+            padding: 5px 25px; border-radius: 50px; font-weight: 900;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
         }
 
-        /* المتجر السفلي - أزرار واضحة */
-        .footer-shop {
-            width: 100%; display: flex; justify-content: space-around;
-            padding-bottom: 30px; background: rgba(0,0,0,0.8);
-            border-top: 2px solid #333; padding-top: 15px;
+        /* المتجر السفلي */
+        .shop-nav {
+            width: 100%; display: grid; grid-template-columns: 1fr 1fr 1fr;
+            gap: 10px; padding: 15px; background: #1e293b; border-top: 3px solid #334155;
         }
-        .shop-item {
-            width: 30%; background: #1a1a1a; border: 1px solid #444;
-            border-radius: 15px; padding: 10px; text-align: center;
-            transition: 0.2s;
+        .item {
+            background: #0f172a; border: 1px solid #334155;
+            padding: 10px; border-radius: 12px; text-align: center;
         }
-        .shop-item.active { border-color: #fbbf24; background: #262626; }
-        .shop-item.locked { opacity: 0.4; }
-        .shop-item b { color: #fbbf24; display: block; font-size: 1.1rem; }
-        .shop-item span { font-size: 0.8rem; color: #aaa; }
+        .item.can-buy { border-color: #eab308; background: #1e1b4b; }
+        .item b { display: block; color: #eab308; font-size: 1rem; }
+        .item span { font-size: 0.75rem; color: #64748b; }
 
-        /* تأثيرات الأرقام المتطايرة */
         .floating-num {
-            position: absolute; color: #fbbf24; font-size: 2.5rem;
+            position: absolute; color: #eab308; font-size: 2.5rem;
             font-weight: 900; pointer-events: none;
-            animation: floatAway 0.8s forwards; z-index: 100;
+            animation: moveUp 0.8s ease-out forwards;
         }
-        @keyframes floatAway {
-            0% { transform: translateY(0); opacity: 1; }
-            100% { transform: translateY(-200px); opacity: 0; }
-        }
+        @keyframes moveUp { 0% { transform: translateY(0); opacity: 1; } 100% { transform: translateY(-150px); opacity: 0; } }
     </style>
 </head>
-<body onload="loadGame()">
+<body onload="loadData()">
 
-    <audio id="snd-click" src="https://www.myinstants.com/media/sounds/coin-drop-1.mp3"></audio>
-    <audio id="snd-buy" src="https://www.myinstants.com/media/sounds/level-up-1.mp3"></audio>
+    <audio id="s-click" src="https://www.myinstants.com/media/sounds/coin-drop-1.mp3"></audio>
+    <audio id="s-buy" src="https://www.myinstants.com/media/sounds/level-up-1.mp3"></audio>
 
-    <div class="header">
-        <span id="score">0</span>
-        <span class="label">ذهب الأساطير 💰</span>
+    <div class="score-board">
+        <div id="gold-count">0</div>
+        <div class="label">ذهب الأساطير 💰</div>
     </div>
 
-    <div class="click-area">
-        <div id="main-button" onclick="handleTap(event)">🪙</div>
-        <div class="power-info">قوة الضربة: <span id="click-power">1</span> ⚔️</div>
+    <div class="click-zone">
+        <div class="main-coin" onclick="handleTap(event)"></div>
+        <div class="power-tag">القوة: <span id="pwr-val">1</span> ⚔️</div>
     </div>
 
-    <div class="footer-shop">
-        <div class="shop-item" id="item0" onclick="buy(0)">
-            <b>خنجر</b>
-            <span id="cost0">50 💰</span>
-        </div>
-        <div class="shop-item" id="item1" onclick="buy(1)">
-            <b>سيف</b>
-            <span id="cost1">300 💰</span>
-        </div>
-        <div class="shop-item" id="item2" onclick="buy(2)">
-            <b>فأس</b>
-            <span id="cost2">1000 💰</span>
-        </div>
+    <div class="shop-nav">
+        <div class="item" id="u0" onclick="buy(0)"><b>خنجر</b><span id="c0">50 💰</span></div>
+        <div class="item" id="u1" onclick="buy(1)"><b>سيف</b><span id="c1">300 💰</span></div>
+        <div class="item" id="u2" onclick="buy(2)"><b>فأس</b><span id="c2">1000 💰</span></div>
     </div>
 
     <script>
-        let score = 0;
-        let clickPower = 1;
-        let costs = [50, 300, 1000];
-        let gains = [1, 10, 50];
-
-        const audioClick = document.getElementById('snd-click');
-        const audioBuy = document.getElementById('snd-buy');
+        let gold = 0; let pwr = 1;
+        let prices = [50, 300, 1000];
+        let boost = [1, 10, 50];
 
         function handleTap(e) {
-            score += clickPower;
+            gold += pwr;
+            document.getElementById('s-click').currentTime = 0;
+            document.getElementById('s-click').play().catch(()=>{});
             
-            // صوت واهتزاز
-            audioClick.currentTime = 0;
-            audioClick.play().catch(()=>{});
-            if(navigator.vibrate) navigator.vibrate(20);
-
-            // أنيميشن رقم النقرة
-            const num = document.createElement('div');
-            num.className = 'floating-num';
-            num.innerText = `+${clickPower}`;
-            num.style.left = e.pageX + 'px';
-            num.style.top = (e.pageY - 50) + 'px';
-            document.body.appendChild(num);
-            setTimeout(() => num.remove(), 800);
-
-            updateUI();
-            saveGame();
+            const n = document.createElement('div');
+            n.className = 'floating-num'; n.innerText = `+${pwr}`;
+            n.style.left = e.pageX + 'px'; n.style.top = e.pageY + 'px';
+            document.body.appendChild(n);
+            setTimeout(() => n.remove(), 800);
+            
+            refresh(); save();
         }
 
-        function buy(idx) {
-            if (score >= costs[idx]) {
-                score -= costs[idx];
-                clickPower += gains[idx];
-                costs[idx] = Math.floor(costs[idx] * 1.8);
-                audioBuy.play().catch(()=>{});
-                updateUI();
-                saveGame();
+        function buy(i) {
+            if (gold >= prices[i]) {
+                gold -= prices[i]; pwr += boost[i];
+                prices[i] = Math.floor(prices[i] * 1.8);
+                document.getElementById('s-buy').play().catch(()=>{});
+                refresh(); save();
             }
         }
 
-        function updateUI() {
-            document.getElementById('score').innerText = Math.floor(score);
-            document.getElementById('click-power').innerText = clickPower;
+        function refresh() {
+            document.getElementById('gold-count').innerText = Math.floor(gold);
+            document.getElementById('pwr-val').innerText = pwr;
             for(let i=0; i<3; i++) {
-                document.getElementById('cost'+i).innerText = costs[i] + ' 💰';
-                const el = document.getElementById('item'+i);
-                if(score >= costs[i]) {
-                    el.classList.add('active');
-                    el.classList.remove('locked');
-                } else {
-                    el.classList.remove('active');
-                    el.classList.add('locked');
-                }
+                document.getElementById('c'+i).innerText = prices[i] + ' 💰';
+                document.getElementById('u'+i).className = gold >= prices[i] ? 'item can-buy' : 'item';
             }
         }
 
-        function saveGame() {
-            localStorage.setItem('yemen_legend_save', JSON.stringify({score, clickPower, costs}));
-        }
-
-        function loadGame() {
-            const saved = JSON.parse(localStorage.getItem('yemen_legend_save'));
-            if(saved) {
-                score = saved.score;
-                clickPower = saved.clickPower;
-                costs = saved.costs;
-                updateUI();
-            }
+        function save() { localStorage.setItem('game_vfinal', JSON.stringify({gold, pwr, prices})); }
+        function loadData() {
+            const d = JSON.parse(localStorage.getItem('game_vfinal'));
+            if(d) { gold = d.gold; pwr = d.pwr; prices = d.prices; }
+            refresh();
         }
     </script>
 </body>
