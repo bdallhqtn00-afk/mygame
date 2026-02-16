@@ -1,4 +1,4 @@
-herename: Build APK
+name: Build APK
 on: [push]
 
 jobs:
@@ -8,29 +8,25 @@ jobs:
       - name: Checkout Source
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Setup Java
+        uses: actions/setup-java@v4
         with:
-          node-version: '18'
+          distribution: 'temurin'
+          java-version: '17'
 
       - name: Install Cordova
         run: npm install -g cordova
 
-      - name: Create Project
+      - name: Create and Build
         run: |
-          cordova create build_dir com.king.clicker KingTap
-          cd build_dir
+          cordova create king_app com.king.tap KingTap
+          cp index.html king_app/www/
+          cd king_app
           cordova platform add android
-          # نسخ ملفك الأساسي للمجلد الصحيح
-          cp ../index.html www/index.html
-
-      - name: Build Android
-        run: |
-          cd build_dir
           cordova build android --debug
-
+          
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: King-Tap-Game
-          path: build_dir/platforms/android/app/build/outputs/apk/debug/app-debug.apk
+          path: king_app/platforms/android/app/build/outputs/apk/debug/app-debug.apk
