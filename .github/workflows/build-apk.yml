@@ -1,35 +1,32 @@
-name: Global Fix Build
-on: [push, workflow_dispatch]
+name: Build APK
+on: [push]
+
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      
-      - name: set up JDK 17
+      - name: Checkout Source
+        uses: actions/checkout@v4
+
+      - name: Setup Java
         uses: actions/setup-java@v4
         with:
-          java-version: '17'
           distribution: 'temurin'
+          java-version: '17'
 
-      - name: Fix Android Permissions
+      - name: Install Cordova
+        run: npm install -g cordova
+
+      - name: Create and Build
         run: |
-          # هذا الأمر يمنح الصلاحيات الكاملة لكل ملفات المشروع
-          chmod -R +x .
+          cordova create king_app com.king.tap KingTap
+          cp index.html king_app/www/
+          cd king_app
+          cordova platform add android
+          cordova build android --debug
           
-      - name: Replace Icon
-        run: |
-          # البحث عن صورتك ووضعها مكان الأيقونة القديمة
-          IMAGE=$(find . -maxdepth 1 -name "*.png" -not -name "ic_launcher.png" | head -1)
-          if [ -n "$IMAGE" ]; then
-            find app/src/main/res -name "ic_launcher.png" -exec cp "$IMAGE" {} \;
-          fi
-
-      - name: Build with Gradle
-        run: ./gradlew assembleDebug --no-daemon
-
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: Fixed-Game-Icon
-          path: app/build/outputs/apk/debug/app-debug.apk
+          name: King-Tap-Game
+          path: king_app/platforms/android/app/build/outputs/apk/debug/app-debug.apk
