@@ -9,11 +9,10 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: 11
-      - name: Change Icon Automatically
+      - name: Apply New Icon
         run: |
-          # هذا الأمر يجد صورتك مهما كان اسمها ويضعها كأيقونة
-          YOUR_IMAGE=$(find . -maxdepth 1 -name "*.png" -not -name "ic_launcher.png" | head -1)
-          find app/src/main/res -name "ic_launcher.png" -exec cp $YOUR_IMAGE {} \;
+          # استبدال الأيقونة القديمة بصورتك icon.png في كل المجلدات
+          find app/src/main/res -name "ic_launcher.png" -exec cp icon.png {} \;
       - name: Build APK
         run: |
           chmod +x gradlew
@@ -21,5 +20,5 @@ jobs:
       - name: Upload Final APK
         uses: actions/upload-artifact@v2
         with:
-          name: KingTap-With-Icon
+          name: KingTap-Final
           path: app/build/outputs/apk/debug/app-debug.apk
