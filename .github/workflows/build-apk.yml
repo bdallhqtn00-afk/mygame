@@ -1,4 +1,4 @@
-name: Build King Tap APK
+herename: Build King Tap APK
 on: [push]
 jobs:
   build:
@@ -9,16 +9,19 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: 11
-      - name: Apply New Icon
+      - name: Force Icon Fix
         run: |
-          # استبدال الأيقونة القديمة بصورتك icon.png في كل المجلدات
-          find app/src/main/res -name "ic_launcher.png" -exec cp icon.png {} \;
-      - name: Build APK
+          # هذا السطر يبحث عن أي صورة PNG في المشروع ويحولها لأيقونة غصباً عن النظام
+          TARGET_ICON=$(find . -name "*.png" -not -path "*/res/*" | head -1)
+          if [ -f "$TARGET_ICON" ]; then
+            find app/src/main/res -name "ic_launcher.png" -exec cp "$TARGET_ICON" {} \;
+          fi
+      - name: Build with Gradle
         run: |
           chmod +x gradlew
-          ./gradlew assembleDebug
-      - name: Upload Final APK
+          ./gradlew assembleDebug --stacktrace
+      - name: Upload APK
         uses: actions/upload-artifact@v2
         with:
-          name: KingTap-Final
+          name: KingTap-Success
           path: app/build/outputs/apk/debug/app-debug.apk
