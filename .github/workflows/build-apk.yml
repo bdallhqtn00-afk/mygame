@@ -1,27 +1,29 @@
-name: Build King Tap APK
+name: Build King Tap APK Success
 on: [push]
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - name: Set up JDK 11
-        uses: actions/setup-java@v1
+      - uses: actions/checkout@v4 # تحديث للإصدار الجديد
+      - name: Set up JDK 17 # تحديث لضمان التوافق
+        uses: actions/setup-java@v4
         with:
-          java-version: 11
-      - name: Force Icon Fix
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Force Icon Injection
         run: |
-          # هذا السطر يبحث عن أي صورة PNG في المشروع ويحولها لأيقونة غصباً عن النظام
-          TARGET_ICON=$(find . -name "*.png" -not -path "*/res/*" | head -1)
-          if [ -f "$TARGET_ICON" ]; then
-            find app/src/main/res -name "ic_launcher.png" -exec cp "$TARGET_ICON" {} \;
-          fi
-      - name: Build with Gradle
+          # البحث عن صورتك icon.png ووضعها في كل المجلدات
+          find app/src/main/res -name "ic_launcher.png" -exec cp icon.png {} \;
+          find app/src/main/res -name "ic_launcher_round.png" -exec cp icon.png {} \;
+
+      - name: Build APK
         run: |
           chmod +x gradlew
-          ./gradlew assembleDebug --stacktrace
-      - name: Upload APK
-        uses: actions/upload-artifact@v2
+          ./gradlew assembleDebug
+
+      - name: Upload Final APK
+        uses: actions/upload-artifact@v4 # هذا هو الإصدار الذي سيحل المشكلة
         with:
-          name: KingTap-Success
+          name: KingTap-Perfect-Icon
           path: app/build/outputs/apk/debug/app-debug.apk
