@@ -1,26 +1,30 @@
-name: Build APK
+name: Build Final APK
 on: [push, workflow_dispatch]
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: setup JDK
+      - name: set up JDK 17
         uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
-      - name: Set Icon
+
+      - name: Force Icon Replace
         run: |
-          # استبدال الأيقونة بالتي رفعتها أنت باسم icon.png
+          # استبدال الأيقونة بالصورة التي سميتها icon.png
           find app/src/main/res -name "ic_launcher.png" -exec cp icon.png {} \;
-      - name: Build
+          find app/src/main/res -name "ic_launcher_round.png" -exec cp icon.png {} \;
+
+      - name: Fix Permissions and Build
         run: |
+          # إصلاح صلاحيات ملف البناء وتشغيله بقوة
           chmod +x gradlew
-          ./gradlew assembleDebug --no-daemon
-      - name: Upload
+          ./gradlew assembleDebug --no-daemon --stacktrace
+
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: game-with-new-icon
+          name: KingTap-Final-Fixed
           path: app/build/outputs/apk/debug/app-debug.apk
-
